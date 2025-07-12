@@ -58,4 +58,12 @@ class User extends Authenticatable
             ->map(fn ($word) => Str::substr($word, 0, 1))
             ->implode('');
     }
+
+    /**
+     * Get the groups owned by the user.
+     */
+    public function groups(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Group::class, 'owner_id');
+    }
 }
