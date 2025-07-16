@@ -6,7 +6,7 @@ namespace Tests\Unit;
 
 use App\Models\Group;
 use App\Models\User;
-use App\Models\Task;
+use App\Models\Todo;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -25,9 +25,9 @@ class GroupTest extends TestCase
     public function test_group_has_many_tasks()
     {
         $group = Group::factory()->create();
-        $tasks = Task::factory()->count(3)->for($group)->create();
+        $todos = Todo::factory()->count(3)->for($group)->create();
         $this->assertCount(3, $group->tasks);
-        $this->assertTrue($group->tasks->contains($tasks[0]));
+        $this->assertTrue($group->tasks->contains($todos[0]));
     }
 
     public function test_fillable_fields()

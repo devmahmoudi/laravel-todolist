@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class Task extends Model
+class Todo extends Model
 {
     use HasFactory;
 
@@ -23,11 +23,11 @@ class Task extends Model
 
     public function parent()
     {
-        return $this->belongsTo(Task::class, 'parent_id');
+        return $this->belongsTo(Todo::class, 'parent_id');
     }
 
     public function children()
     {
-        return $this->hasMany(Task::class, 'parent_id');
+        return $this->hasMany(Todo::class, 'parent_id');
     }
 }
