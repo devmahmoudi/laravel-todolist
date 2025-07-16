@@ -34,7 +34,6 @@ class GroupTest extends TestCase
     {
         $group = new Group([
             'name' => 'Test Group',
-            'desc' => 'A test group',
             'owner_id' => 1,
         ]);
         $this->assertEquals('Test Group', $group->name);
