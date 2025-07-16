@@ -18,7 +18,6 @@ class GroupFactory extends Factory
     {
         return [
             'name' => $this->faker->company(),
-            'desc' => $this->faker->sentence(10),
             'owner_id' => \App\Models\User::factory(),
         ];
     }
