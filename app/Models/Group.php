@@ -11,7 +11,6 @@ class Group extends Model
 
     protected $fillable = [
         'name',
-        'desc',
         'owner_id',
     ];
 
