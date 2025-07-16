@@ -22,6 +22,6 @@ class Group extends Model
 
     public function tasks()
     {
-        return $this->hasMany(Task::class, 'group_id');
+        return $this->hasMany(Todo::class, 'group_id');
     }
 }
