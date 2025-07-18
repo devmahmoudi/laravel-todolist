@@ -13,12 +13,12 @@ const GroupItem = ({ item }) => {
 
     const handleEditIconClick = (e) => {
         preventNavigate(e)
-        
+
         setEnableEditInput(true)
     }
 
     useEffect(() => {
-        if(enableEditInput)
+        if (enableEditInput)
             inputRef.current.focus()
     }, [enableEditInput])
 
@@ -26,15 +26,15 @@ const GroupItem = ({ item }) => {
         <SidebarMenuItem key={item.id}>
             <SidebarMenuButton className='text-gray-400 group' asChild isActive={page.url.startsWith(item.id)} tooltip={{ children: item.name }}>
                 <Link href={item.id} prefetch className='flex justify-between hover:[&>svg]:block'>
-                    <span className='flex'>
+                    <span className='flex align-middle'>
+                        <Hash className='w-4 mr-2' />
                         {
                             enableEditInput ?
                                 (
-                                    <Input ref={inputRef} value={item.name} onFocus={(e) => preventNavigate(e)} onClick={(e) => preventNavigate(e)}/>
+                                    <Input className='border-0 px-0 h-[23px] focus:shadow-none' ref={inputRef} value={item.name} onFocus={(e) => preventNavigate(e)} onClick={(e) => preventNavigate(e)} />
                                 ) :
                                 (
                                     <>
-                                        <Hash className='w-4 mr-2' />
                                         <span>{item.name}</span>
                                     </>
                                 )
