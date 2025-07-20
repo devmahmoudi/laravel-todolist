@@ -17,7 +17,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
             </SidebarGroupLabel>
             <SidebarMenu>
                 {groups.map((item) => (
-                    <GroupItem item={item}/>
+                    <GroupItem item={item} key={item.id}/>
                 ))}
             </SidebarMenu>
         </SidebarGroup>
