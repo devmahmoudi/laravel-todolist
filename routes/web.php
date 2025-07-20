@@ -14,9 +14,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('dashboard');
 
     // GROUP routes
-    Route::name('group')->prefix('/group')->controller(GroupController::class)->group(function(){
-        Route::post('/', 'store');
-        Route::patch('/{group}', 'update');
+    Route::name('group.')->prefix('/group')->controller(GroupController::class)->group(function(){
+        Route::post('/', 'store')->name('store');
+        Route::patch('/{group}', 'update')->name('update');
     });
 });
 
