@@ -1,26 +1,20 @@
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Input } from '@/components/ui/input';
 import { Link, usePage } from '@inertiajs/react';
 import { Hash, Plus, Edit } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { preventNavigate } from '@/lib/utils';
+import EditGroup from '@/components/group/edit-group'
 
 
 const GroupItem = ({ item }) => {
     const page = usePage();
     const [enableEditInput, setEnableEditInput] = useState(false)
-    const inputRef = useRef(null)
 
     const handleEditIconClick = (e) => {
         preventNavigate(e)
 
         setEnableEditInput(true)
     }
-
-    useEffect(() => {
-        if (enableEditInput)
-            inputRef.current.focus()
-    }, [enableEditInput])
 
     return (
         <SidebarMenuItem key={item.id}>
@@ -31,7 +25,7 @@ const GroupItem = ({ item }) => {
                         {
                             enableEditInput ?
                                 (
-                                    <Input className='border-0 px-0 h-[23px] focus:shadow-none' ref={inputRef} value={item.name} onFocus={(e) => preventNavigate(e)} onClick={(e) => preventNavigate(e)} />
+                                    <EditGroup value={item.name}/>
                                 ) :
                                 (
                                     <>
