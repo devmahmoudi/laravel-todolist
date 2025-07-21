@@ -25,7 +25,9 @@ const GroupItem = ({ item }) => {
                         {
                             enableEditInput ?
                                 (
-                                    <EditGroup value={item.name}/>
+                                    <EditGroup group={item} onSaved={() => {
+                                        setEnableEditInput(false)
+                                    }}/>
                                 ) :
                                 (
                                     <>
