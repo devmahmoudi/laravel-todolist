@@ -109,7 +109,7 @@ class GroupControllerTest extends TestCase
             'name' => 'Hacked Name',
         ]);
 
-        $response->assertStatus(403);
+        $response->assertStatus(404);
         $this->assertDatabaseHas('groups', [
             'id' => $group->id,
             'name' => 'Other Group',
