@@ -39,4 +39,24 @@ class GroupTest extends TestCase
         $this->assertEquals('Test Group', $group->name);
         $this->assertEquals(1, $group->owner_id);
     }
+
+    public function test_group_owner_scope_returns_only_authenticated_users_groups()
+    {
+        $user1 = User::factory()->create();
+        $user2 = User::factory()->create();
+
+        // Create groups for both users
+        $groupsUser1 = Group::factory()->count(2)->create(['owner_id' => $user1->id]);
+        Group::factory()->count(2)->create(['owner_id' => $user2->id]);
+
+        // Authenticate as user1
+        $this->actingAs($user1);
+
+        // The scope should only return user1's groups
+        $groups = Group::all();
+        $this->assertCount(2, $groups);
+        foreach ($groups as $group) {
+            $this->assertEquals($user1->id, $group->owner_id);
+        }
+    }
 } 
