@@ -6,6 +6,7 @@ namespace Tests\Unit;
 
 use App\Models\Todo;
 use App\Models\Group;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -15,7 +16,11 @@ class TodoTest extends TestCase
 
     public function test_todo_belongs_to_group()
     {
-        $group = Group::factory()->create();
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $group = Group::factory()->for($user, 'owner')->create();
         $todo = Todo::factory()->for($group)->create();
         $this->assertInstanceOf(Group::class, $todo->group);
         $this->assertEquals($group->id, $todo->group->id);
