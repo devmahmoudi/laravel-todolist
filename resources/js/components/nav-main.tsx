@@ -16,6 +16,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                 <Plus className='cursor-pointer' />
             </SidebarGroupLabel>
             <SidebarMenu>
+                {/* Render groups list */}
                 {groups.map((item) => (
                     <GroupItem item={item} key={item.id}/>
                 ))}
