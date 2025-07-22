@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\Scopes\GroupOwnerScope;
+use Illuminate\Support\Facades\Auth;
 
 #[ScopedBy([GroupOwnerScope::class])]
 class Group extends Model
@@ -16,6 +17,17 @@ class Group extends Model
         'name',
         'owner_id',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($group) {
+            if (empty($group->owner_id) && Auth::check()) {
+                $group->owner_id = Auth::id();
+            }
+        });
+    }
 
     public function owner()
     {
