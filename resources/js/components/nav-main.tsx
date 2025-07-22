@@ -14,7 +14,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
                 <Plus className='cursor-pointer' onClick={() => setDisplayCreateGroupInput(!displayCreateGroupInput)}/>
             </SidebarGroupLabel>
             <SidebarMenu>
-                <GroupsList displayCreateGroupInput={displayCreateGroupInput}/>
+                <GroupsList setDisplayCreateGroupInput={setDisplayCreateGroupInput} displayCreateGroupInput={displayCreateGroupInput}/>
             </SidebarMenu>
         </SidebarGroup>
     );
