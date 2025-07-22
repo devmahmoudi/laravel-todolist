@@ -1,11 +1,10 @@
 import { Input } from '@/components/ui/input';
 import { useForm } from '@inertiajs/react';
-import path from 'path';
-import { useEffect, useState, useRef } from "react"
+import { useEffect, useRef } from "react"
 
 const EditGroup = ({ group, onSaved }) => {
     const inputRef = useRef(null)
-    const { data, setData, patch, processing } = useForm({
+    const { data, setData, patch } = useForm({
         name: group.name,
     });
 
