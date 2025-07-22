@@ -13,9 +13,9 @@ const EditGroup = ({ group, onSaved }) => {
     }, [])
 
     const handleSave = () => {
-        patch(route('group.update', group.id), {
-            onFinish: onSaved
-        });
+        patch(route('group.update', group.id));
+
+        onSaved()
     }
 
     return (
