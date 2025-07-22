@@ -8,12 +8,12 @@ import EditGroup from '@/components/group/edit-group'
 
 const GroupItem = ({ item }) => {
     const page = usePage();
-    const [enableEditInput, setEnableEditInput] = useState(false)
+    const [enableEditGroup, setEnableEditGroup] = useState(false)
 
     const handleEditIconClick = (e) => {
         preventNavigate(e)
 
-        setEnableEditInput(true)
+        setEnableEditGroup(true)
     }
 
     return (
@@ -23,10 +23,10 @@ const GroupItem = ({ item }) => {
                     <span className='flex align-middle'>
                         <Hash className='w-4 mr-2' />
                         {
-                            enableEditInput ?
+                            enableEditGroup ?
                                 (
                                     <EditGroup group={item} onSaved={() => {
-                                        setEnableEditInput(false)
+                                        setEnableEditGroup(false)
                                     }}/>
                                 ) :
                                 (
