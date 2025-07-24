@@ -7,9 +7,6 @@ const GroupsList = ({setDisplayCreateGroupInput, displayCreateGroupInput}) => {
     const page = usePage();
     const { groups } = page.props
 
-    console.log(groups);
-    
-
     return (
         <>
             {
