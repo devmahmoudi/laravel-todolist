@@ -46,4 +46,23 @@ class GroupController extends Controller
 
         return back()->with('toast@success', 'Group has been updated.');
     }
+
+    /**
+     * Delete the specified Group
+     *
+     * @param \App\Models\Group $group
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy(Group $group)
+    {
+        if ($group->owner_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $group->delete();
+
+        return back()->with('toast@success', 'Group has been deleted.');
+    }
+
+    
 }

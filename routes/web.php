@@ -17,6 +17,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::name('group.')->prefix('/group')->controller(GroupController::class)->group(function(){
         Route::post('/', 'store')->name('store');
         Route::patch('/{group}', 'update')->name('update');
+        Route::delete('/{group}', 'destroy')->name('destroy');
     });
 });
 
