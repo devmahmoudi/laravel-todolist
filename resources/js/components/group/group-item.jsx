@@ -1,6 +1,6 @@
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/react';
-import { Hash, EllipsisVertical, Plus, Edit } from 'lucide-react';
+import { Hash, EllipsisVertical, Plus, Edit, Trash } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { preventNavigate } from '@/lib/utils';
 import EditGroup from '@/components/group/edit-group'
@@ -56,8 +56,14 @@ const GroupItem = ({ item }) => {
                                         }, 200);
                                     }}
                                 >
-                                    <Edit/>
+                                    <Edit />
                                     Edit
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className='cursor-pointer'
+                                >
+                                    <Trash />
+                                    Delete
                                 </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu></>
