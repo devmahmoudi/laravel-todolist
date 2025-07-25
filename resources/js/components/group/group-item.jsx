@@ -1,5 +1,5 @@
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Link, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Hash, EllipsisVertical, Plus, Edit, Trash } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { preventNavigate } from '@/lib/utils';
@@ -20,6 +20,10 @@ const GroupItem = ({ item }) => {
 
     const handleEditIconClick = (e) => {
         setEnableEditGroup(true)
+    }
+
+    const handleDeleteItem = () => {
+        router.delete(route('group.destroy', item.id))
     }
 
     return (
@@ -61,6 +65,7 @@ const GroupItem = ({ item }) => {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     className='cursor-pointer'
+                                    onClick={handleDeleteItem}
                                 >
                                     <Trash />
                                     Delete
