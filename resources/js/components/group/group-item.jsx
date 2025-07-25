@@ -1,15 +1,12 @@
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { Link, router, usePage } from '@inertiajs/react';
-import { Hash, EllipsisVertical, Plus, Edit, Trash } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
-import { preventNavigate } from '@/lib/utils';
+import { router, usePage } from '@inertiajs/react';
+import { Hash, EllipsisVertical, Edit, Trash } from 'lucide-react';
+import { useState } from 'react';
 import EditGroup from '@/components/group/edit-group'
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 
@@ -22,7 +19,6 @@ import {
     AlertDialogFooter,
     AlertDialogHeader,
     AlertDialogTitle,
-    AlertDialogTrigger,
 } from "@/components/ui/alert-dialog"
 
 
