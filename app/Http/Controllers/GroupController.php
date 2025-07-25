@@ -22,7 +22,7 @@ class GroupController extends Controller
 
         Auth::user()->groups()->create($validated);
 
-        return back()->with('toast@success', "New group has been created.");
+        return back()->with('toast.success', "New group has been created.");
     }
 
     /**
@@ -44,7 +44,7 @@ class GroupController extends Controller
 
         $group->update($validated);
 
-        return back()->with('toast@success', 'Group has been updated.');
+        return back()->with('toast.success', 'Group has been updated.');
     }
 
     /**
@@ -61,7 +61,7 @@ class GroupController extends Controller
 
         $group->delete();
 
-        return back()->with('toast@success', 'Group has been deleted.');
+        return back()->with('toast.success', 'Group has been deleted.');
     }
 
     
