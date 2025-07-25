@@ -115,4 +115,34 @@ class GroupControllerTest extends TestCase
             'name' => 'Other Group',
         ]);
     }
+
+    public function test_authenticated_user_can_delete_group()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $this->actingAs($user);
+
+        $response = $this->delete('/group/' . $group->id);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast@success', 'Group has been deleted.');
+        $this->assertDatabaseMissing('groups', [
+            'id' => $group->id,
+        ]);
+    }
+
+    public function test_non_owner_cannot_delete_group()
+    {
+        $owner = User::factory()->create();
+        $otherUser = User::factory()->create();
+        $group = Group::factory()->for($owner, 'owner')->create();
+        $this->actingAs($otherUser);
+
+        $response = $this->delete('/group/' . $group->id);
+
+        $response->assertStatus(404);
+        $this->assertDatabaseHas('groups', [
+            'id' => $group->id,
+        ]);
+    }
 } 
