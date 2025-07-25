@@ -21,7 +21,7 @@ class GroupControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast@success', 'New group has been created.');
+        $response->assertSessionHas('toast.success', 'New group has been created.');
         $this->assertDatabaseHas('groups', [
             'name' => 'Test Group',
             'owner_id' => $user->id,
@@ -64,7 +64,7 @@ class GroupControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast@success', 'Group has been updated.');
+        $response->assertSessionHas('toast.success', 'Group has been updated.');
         $this->assertDatabaseHas('groups', [
             'id' => $group->id,
             'name' => 'New Name',
@@ -125,7 +125,7 @@ class GroupControllerTest extends TestCase
         $response = $this->delete('/group/' . $group->id);
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast@success', 'Group has been deleted.');
+        $response->assertSessionHas('toast.success', 'Group has been deleted.');
         $this->assertDatabaseMissing('groups', [
             'id' => $group->id,
         ]);
