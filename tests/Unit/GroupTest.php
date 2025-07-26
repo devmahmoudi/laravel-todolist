@@ -22,12 +22,12 @@ class GroupTest extends TestCase
         $this->assertEquals($user->id, $group->owner->id);
     }
 
-    public function test_group_has_many_tasks()
+    public function test_group_has_many_todo()
     {
         $group = Group::factory()->create();
         $todos = Todo::factory()->count(3)->for($group)->create();
-        $this->assertCount(3, $group->tasks);
-        $this->assertTrue($group->tasks->contains($todos[0]));
+        $this->assertCount(3, $group->todo);
+        $this->assertTrue($group->todo->contains($todos[0]));
     }
 
     public function test_fillable_fields()
