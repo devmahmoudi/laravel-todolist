@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\GroupController;
+use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
@@ -19,6 +20,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::patch('/{group}', 'update')->name('update');
         Route::delete('/{group}', 'destroy')->name('destroy');
     });
+
+    Route::get('/{group}/todo', [TodoController::class, 'index'])->name('group.todo');
 });
 
 require __DIR__.'/settings.php';
