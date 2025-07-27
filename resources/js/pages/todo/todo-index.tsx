@@ -31,7 +31,9 @@ const TodoIndex = () => {
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
                 <Table>
-                    <TableCaption>A list of your recent invoices.</TableCaption>
+                    {!todo.length && (
+                        <TableCaption>There are no todos in this group</TableCaption>
+                    )}
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[100px]">Title</TableHead>
