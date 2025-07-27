@@ -14,7 +14,7 @@ import {
 import { dateFnsFormat } from '@/lib/utils';
 
 const TodoIndex = () => {
-    const { group, todo } = usePage().props
+    const { group, todos } = usePage().props
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -28,7 +28,7 @@ const TodoIndex = () => {
             <Head title="Dashboard" />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
                 <Table>
-                    {!todo.length && (
+                    {!todos.length && (
                         <TableCaption>There are no todos in this group</TableCaption>
                     )}
                     <TableHeader>
@@ -40,7 +40,7 @@ const TodoIndex = () => {
                     </TableHeader>
                     <TableBody>
                         {
-                            todo.map((item) => (
+                            todos.map((item) => (
                                 <TableRow key={item.id}>
                                     <TableCell className="font-medium truncate max-w-[200px]">{item.title}</TableCell>
                                     <TableCell className="truncate max-w-[400px]">{item.description}</TableCell>

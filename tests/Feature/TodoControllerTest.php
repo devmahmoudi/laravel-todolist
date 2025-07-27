@@ -48,7 +48,7 @@ class TodoControllerTest extends TestCase
                         ->where('owner_id', $group->owner_id)
                         ->etc()
                 )
-                ->has('todo', $todoCount)
+                ->has('todos', $todoCount)
             );
     }
 }
