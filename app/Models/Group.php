@@ -34,7 +34,7 @@ class Group extends Model
         return $this->belongsTo(User::class, 'owner_id');
     }
 
-    public function tasks()
+    public function todos()
     {
         return $this->hasMany(Todo::class, 'group_id');
     }
