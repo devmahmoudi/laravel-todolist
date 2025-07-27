@@ -25,7 +25,7 @@ const TodoIndex = () => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title={`${group.name} todos`} />
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
                 <Table>
                     {!todos.length && (
