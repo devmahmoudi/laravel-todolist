@@ -16,7 +16,7 @@ class TodoController extends Controller
     {
         return Inertia::render('todo/todo-index', [
             'group' => $group,
-            'todos' => $group->todo
+            'todos' => $group->todos
         ]);
     }
 
