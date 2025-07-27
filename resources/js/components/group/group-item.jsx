@@ -1,5 +1,5 @@
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { router, usePage } from '@inertiajs/react';
+import { Link, router, usePage } from '@inertiajs/react';
 import { Hash, EllipsisVertical, Edit, Trash } from 'lucide-react';
 import { useState } from 'react';
 import EditGroup from '@/components/group/edit-group'
@@ -39,7 +39,7 @@ const GroupItem = ({ item }) => {
         <>
             <SidebarMenuItem key={item.id}>
                 <SidebarMenuButton className='text-gray-400 group' asChild isActive={page.url.startsWith(item.id)} tooltip={{ children: item.name }}>
-                    <div className='flex justify-between hover:[&>svg]:block'>
+                    <Link href={route('group.todo', item.id)} className='flex justify-between hover:[&>svg]:block'>
                         <>
                             <span className='flex align-middle'>
                                 <Hash className='w-4 mr-2' />
@@ -86,7 +86,7 @@ const GroupItem = ({ item }) => {
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu></>
-                    </div>
+                    </Link>
                 </SidebarMenuButton>
             </SidebarMenuItem>
 
