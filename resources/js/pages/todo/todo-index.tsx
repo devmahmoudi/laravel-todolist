@@ -11,6 +11,7 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import { dateFnsFormat } from '@/lib/utils';
 
 
 
@@ -44,7 +45,7 @@ const TodoIndex = () => {
                                 <TableRow key={item.id}>
                                     <TableCell className="font-medium truncate max-w-[200px]">{item.title}</TableCell>
                                     <TableCell className="truncate max-w-[400px]">{item.description}</TableCell>
-                                    <TableCell>{item.created_at}</TableCell>
+                                    <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
                                 </TableRow>
                             ))
                         }
