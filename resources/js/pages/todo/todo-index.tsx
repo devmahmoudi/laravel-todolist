@@ -13,9 +13,6 @@ import {
 } from "@/components/ui/table"
 import { dateFnsFormat } from '@/lib/utils';
 
-
-
-
 const TodoIndex = () => {
     const { group, todo } = usePage().props
 
