@@ -14,9 +14,20 @@ import { dateFnsFormat } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Separator } from '@radix-ui/react-separator';
+import { useState } from 'react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog"
+import CreateTodo from './create-todo';
 
 const TodoIndex = () => {
     const { group, todos } = usePage().props
+    const [showCreateDialog, setShowCreateDialog] = useState(false)
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -28,6 +39,15 @@ const TodoIndex = () => {
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
             <Head title={`${group.name} todos`} />
+
+            {/* CREATE NEW TODO DIALOG */}
+            <Dialog open={showCreateDialog} onOpenChange={() => setShowCreateDialog(false)}>
+                <DialogContent>
+                    <CreateTodo/>
+                </DialogContent>
+            </Dialog>
+
+            {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
                 <Table>
                     <TableCaption>
@@ -35,9 +55,9 @@ const TodoIndex = () => {
                             {!todos.length && (
                                 <p>There are no todos in this group</p>
                             )}
-                            <Separator className='border-white'/>
+                            <Separator className='border-white' />
                             <div>
-                                <Button size={'sm'}>
+                                <Button className='cursor-pointer' size={'sm'} onClick={() => setShowCreateDialog(true)}>
                                     <Plus />
                                     <span>Create new todo</span>
                                 </Button>
