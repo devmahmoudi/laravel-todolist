@@ -6,6 +6,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "@inertiajs/react";
 import { ChangeEvent, useEffect } from "react";
+import { ClipLoader } from "react-spinners"
 import {
     Dialog,
     DialogContent,
@@ -26,9 +27,9 @@ const CreateTodoDialog = ({ open, setOpen, groupId }) => {
 
     const handleSubmit = () => {
         post(
-            route('todo.store'),{
-                onSuccess: () => setOpen(false)
-            }
+            route('todo.store'), {
+            onSuccess: () => setOpen(false)
+        }
         )
     }
 
@@ -70,7 +71,11 @@ const CreateTodoDialog = ({ open, setOpen, groupId }) => {
                 </div>
 
                 <div className="flex gap-2 justify-end">
-                    <Button className="cursor-pointer" onClick={handleSubmit}>Create</Button>
+                    <Button className="cursor-pointer" onClick={handleSubmit}>
+                        {
+                            processing ? <ClipLoader size={20}/> : <span>Create</span>
+                        }
+                    </Button>
                     <Button className="cursor-pointer bg-yellow-300 border-white" onClick={() => setOpen(false)}>Cancel</Button>
                 </div>
             </DialogContent>
