@@ -51,4 +51,25 @@ class TodoControllerTest extends TestCase
                 ->has('todos', $todoCount)
             );
     }
+
+    public function test_store_todo_creates_todo_and_redirects_with_success_message()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $this->actingAs($user);
+
+        $data = [
+            'title' => 'Test Todo',
+            'description' => 'Test description',
+            'group_id' => $group->id,
+            'parent_id' => null,
+        ];
+
+        $response = $this->post(route('todo.store'), $data);
+
+        $this->assertDatabaseHas('todos', $data);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo created successfully.');
+    }
 }

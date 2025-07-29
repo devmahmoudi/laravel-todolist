@@ -1,4 +1,3 @@
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
 import { Head, usePage } from '@inertiajs/react';
@@ -12,9 +11,16 @@ import {
     TableRow,
 } from "@/components/ui/table"
 import { dateFnsFormat } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Plus } from 'lucide-react';
+import { Separator } from '@radix-ui/react-separator';
+import { useState } from 'react';
+import CreateTodoDialog from '@/components/todo/create-todo-dialog'
+
 
 const TodoIndex = () => {
     const { group, todos } = usePage().props
+    const [showCreateDialog, setShowCreateDialog] = useState(false)
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -25,12 +31,28 @@ const TodoIndex = () => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
+            <Head title={`${group.name} todos`} />
+
+            {/* CREATE NEW TODO DIALOG */}
+            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id}/>
+
+            {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
                 <Table>
-                    {!todos.length && (
-                        <TableCaption>There are no todos in this group</TableCaption>
-                    )}
+                    <TableCaption>
+                        <div className='grid gap-3'>
+                            {!todos.length && (
+                                <p>There are no todos in this group</p>
+                            )}
+                            <Separator className='border-white' />
+                            <div>
+                                <Button className='cursor-pointer' size={'sm'} onClick={() => setShowCreateDialog(true)}>
+                                    <Plus />
+                                    <span>Create new todo</span>
+                                </Button>
+                            </div>
+                        </div>
+                    </TableCaption>
                     <TableHeader>
                         <TableRow>
                             <TableHead className="w-[100px]">Title</TableHead>
