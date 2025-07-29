@@ -66,7 +66,7 @@ const CreateTodoDialog = ({ open, setOpen }) => {
 
                 <div className="flex gap-2 justify-end">
                     <Button className="cursor-pointer" onClick={handleSubmit}>Create</Button>
-                    <Button className="cursor-pointer bg-yellow-300 border-white">Cancel</Button>
+                    <Button className="cursor-pointer bg-yellow-300 border-white" onClick={() => setOpen(false)}>Cancel</Button>
                 </div>
             </DialogContent>
         </Dialog>
