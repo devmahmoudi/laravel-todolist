@@ -15,16 +15,21 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 
-const CreateTodoDialog = ({ open, setOpen }) => {
+const CreateTodoDialog = ({ open, setOpen, groupId }) => {
     const { data, setData, post, processing, errors } = useForm({
         title: '',
         description: '',
+        group_id: groupId
     })
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => setData({ ...data, [e.target.name]: e.target.value })
 
     const handleSubmit = () => {
-        alert('Handle submit')
+        post(
+            route('todo.store'),{
+                onSuccess: () => setOpen(false)
+            }
+        )
     }
 
     return (
@@ -45,7 +50,7 @@ const CreateTodoDialog = ({ open, setOpen }) => {
                         placeholder="todo title ..."
                     />
 
-                    <InputError className="mt-2" message={errors.title} />
+                    <InputError message={errors.title} />
                 </div>
 
                 <div className="grid gap-2">

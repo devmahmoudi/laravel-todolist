@@ -34,7 +34,7 @@ const TodoIndex = () => {
             <Head title={`${group.name} todos`} />
 
             {/* CREATE NEW TODO DIALOG */}
-            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog}/>
+            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id}/>
 
             {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
