@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Group;
 use App\Models\Todo;
-use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Models\Group;
+use Illuminate\Http\Request;
+use App\Http\Requests\StoreTodoRequest;
+use Illuminate\Support\Facades\Log;
 
 class TodoController extends Controller
 {
@@ -31,9 +33,13 @@ class TodoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreTodoRequest $request)
     {
-        //
+        Todo::create(
+            $request->validated()
+        );
+       
+        return back()->with('toast.success', 'Todo created successfully.');
     }
 
     /**
