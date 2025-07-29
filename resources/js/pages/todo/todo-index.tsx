@@ -15,15 +15,8 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Separator } from '@radix-ui/react-separator';
 import { useState } from 'react';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog"
-import CreateTodo from './create-todo';
+import CreateTodoDialog from '@/components/todo/create-todo-dialog'
+
 
 const TodoIndex = () => {
     const { group, todos } = usePage().props
@@ -41,11 +34,7 @@ const TodoIndex = () => {
             <Head title={`${group.name} todos`} />
 
             {/* CREATE NEW TODO DIALOG */}
-            <Dialog open={showCreateDialog} onOpenChange={() => setShowCreateDialog(false)}>
-                <DialogContent>
-                    <CreateTodo/>
-                </DialogContent>
-            </Dialog>
+            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog}/>
 
             {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
