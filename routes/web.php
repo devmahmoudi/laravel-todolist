@@ -21,6 +21,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('/{group}', 'destroy')->name('destroy');
     });
 
+    Route::post('/todo', [TodoController::class, 'store'])->name('todo.store');
     Route::get('/{group}/todo', [TodoController::class, 'index'])->name('group.todo');
 });
 
