@@ -66,7 +66,7 @@ const GroupItem = ({ item }) => {
                                     <DropdownMenuItem
                                         className='cursor-pointer'
                                         onClick={(e) => {
-                                            preventNavigate(e)
+                                            e.stopPropagation()
                                             setTimeout(() => {
                                                 handleEditIconClick(e);
                                             }, 200);
