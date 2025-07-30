@@ -20,6 +20,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { preventNavigate } from '@/lib/utils';
 
 
 const GroupItem = ({ item }) => {
@@ -65,6 +66,7 @@ const GroupItem = ({ item }) => {
                                     <DropdownMenuItem
                                         className='cursor-pointer'
                                         onClick={(e) => {
+                                            preventNavigate(e)
                                             setTimeout(() => {
                                                 handleEditIconClick(e);
                                             }, 200);
@@ -76,6 +78,7 @@ const GroupItem = ({ item }) => {
                                     <DropdownMenuItem
                                         className='cursor-pointer'
                                         onClick={(e) => {
+                                            preventNavigate(e)
                                             setTimeout(() => {
                                                 setDisplayDeleteDialog(true)
                                             }, 200);
