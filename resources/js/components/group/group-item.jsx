@@ -1,7 +1,7 @@
 import { SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Hash, EllipsisVertical, Edit, Trash } from 'lucide-react';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import EditGroup from '@/components/group/edit-group'
 import {
     DropdownMenu,
@@ -21,19 +21,24 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { preventNavigate } from '@/lib/utils';
+import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog';
 
 
 const GroupItem = ({ item }) => {
     const page = usePage();
     const [enableEditGroup, setEnableEditGroup] = useState(false)
-    const [displayDeleteDialog, setDisplayDeleteDialog] = useState(false)
+    const deleteDialogTrigger = useRef()
 
     const handleEditIconClick = (e) => {
         setEnableEditGroup(true)
     }
 
     const handleDeleteItem = () => {
-        router.delete(route('group.destroy', item.id))
+        setDisplayDeleteDialog(false)
+
+        setTimeout(() => {
+            router.delete(route('group.destroy', item.id))
+        }, 1000);
     }
 
     return (
@@ -80,7 +85,7 @@ const GroupItem = ({ item }) => {
                                         onClick={(e) => {
                                             preventNavigate(e)
                                             setTimeout(() => {
-                                                setDisplayDeleteDialog(true)
+                                                deleteDialogTrigger?.current.click()
                                             }, 200);
                                         }}
                                     >
@@ -94,7 +99,8 @@ const GroupItem = ({ item }) => {
             </SidebarMenuItem>
 
             {/* BEGIN: Deletation Alert Dialog */}
-            <AlertDialog open={displayDeleteDialog}>
+            <AlertDialog>
+                <AlertDialogTrigger ref={deleteDialogTrigger}/>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
@@ -103,7 +109,7 @@ const GroupItem = ({ item }) => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className='cursor-pointer' onClick={() => setDisplayDeleteDialog(false)}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className='cursor-pointer'>Cancel</AlertDialogCancel>
                         <AlertDialogAction className='cursor-pointer' onClick={handleDeleteItem}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
