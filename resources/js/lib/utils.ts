@@ -17,3 +17,8 @@ export function preventNavigate(e: MouseEvent | KeyboardEvent) {
     e.stopPropagation();
     e.preventDefault();
 }
+
+export function removeHtmlBodyNonePointerEventsStyle(){
+    const body = document.getElementsByTagName('body')[0]
+    body.style.pointerEvents = ''
+}
