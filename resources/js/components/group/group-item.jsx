@@ -28,7 +28,6 @@ const GroupItem = ({ item }) => {
     const page = usePage();
     const [enableEditGroup, setEnableEditGroup] = useState(false)
     const deleteDialogTriggerRef = useRef()
-    const closeDialogRef = useRef()
 
     const handleEditIconClick = (e) => {
         setEnableEditGroup(true)
@@ -106,7 +105,7 @@ const GroupItem = ({ item }) => {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className='cursor-pointer' ref={closeDialogRef}>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel className='cursor-pointer'>Cancel</AlertDialogCancel>
                         <AlertDialogAction className='cursor-pointer' onClick={handleDeleteItem}>Continue</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
