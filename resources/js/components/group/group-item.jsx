@@ -27,7 +27,7 @@ import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog';
 const GroupItem = ({ item }) => {
     const page = usePage();
     const [enableEditGroup, setEnableEditGroup] = useState(false)
-    const deleteDialogTrigger = useRef()
+    const deleteDialogTriggerRef = useRef()
 
     const handleEditIconClick = (e) => {
         setEnableEditGroup(true)
@@ -85,7 +85,7 @@ const GroupItem = ({ item }) => {
                                         onClick={(e) => {
                                             preventNavigate(e)
                                             setTimeout(() => {
-                                                deleteDialogTrigger?.current.click()
+                                                deleteDialogTriggerRef?.current.click()
                                             }, 200);
                                         }}
                                     >
@@ -100,7 +100,7 @@ const GroupItem = ({ item }) => {
 
             {/* BEGIN: Deletation Alert Dialog */}
             <AlertDialog>
-                <AlertDialogTrigger ref={deleteDialogTrigger}/>
+                <AlertDialogTrigger ref={deleteDialogTriggerRef}/>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
