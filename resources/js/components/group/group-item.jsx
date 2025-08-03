@@ -35,8 +35,6 @@ const GroupItem = ({ item }) => {
     }
 
     const handleDeleteItem = () => {
-        setDisplayDeleteDialog(false)
-
         setTimeout(() => {
             router.delete(route('group.destroy', item.id))
         }, 1000);
