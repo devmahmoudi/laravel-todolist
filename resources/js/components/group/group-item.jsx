@@ -35,9 +35,7 @@ const GroupItem = ({ item }) => {
     }
 
     const handleDeleteItem = () => {
-        setTimeout(() => {
-            router.delete(route('group.destroy', item.id))
-        }, 1000);
+        router.delete(route('group.destroy', item.id))
     }
 
     return (
@@ -99,7 +97,7 @@ const GroupItem = ({ item }) => {
 
             {/* BEGIN: Deletation Alert Dialog */}
             <AlertDialog>
-                <AlertDialogTrigger ref={deleteDialogTriggerRef}/>
+                <AlertDialogTrigger ref={deleteDialogTriggerRef} />
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
