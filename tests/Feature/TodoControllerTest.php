@@ -72,4 +72,20 @@ class TodoControllerTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('toast.success', 'Todo created successfully.');
     }
+
+    public function test_destroy_todo_deletes_todo_and_redirects_with_success_message()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create();
+        
+        $this->actingAs($user);
+
+        $response = $this->delete(route('todo.delete', $todo->id));
+
+        $this->assertDatabaseMissing('todos', ['id' => $todo->id]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo deleted successfully.');
+    }
 }
