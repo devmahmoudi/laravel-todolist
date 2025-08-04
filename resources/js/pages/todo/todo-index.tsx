@@ -16,7 +16,7 @@ import { Plus } from 'lucide-react';
 import { Separator } from '@radix-ui/react-separator';
 import { useState } from 'react';
 import CreateTodoDialog from '@/components/todo/create-todo-dialog'
-import TodoDetailDialog from './todo-detail-dialog';
+import TodoDetailDialog from '../../components/todo/todo-detail-dialog';
 import DeleteTodoConfirmationDialog from '@/components/todo/delete-todo-confirmation-dialog';
 
 
