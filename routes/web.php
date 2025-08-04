@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/todo', [TodoController::class, 'store'])->name('todo.store');
     Route::get('/{group}/todo', [TodoController::class, 'index'])->name('group.todo');
+    Route::delete('/todo/{todo}', [TodoController::class, 'destroy'])->name('todo.delete');
 });
 
 require __DIR__.'/settings.php';
