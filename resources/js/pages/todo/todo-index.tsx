@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, usePage } from '@inertiajs/react';
+import { Head, router, usePage } from '@inertiajs/react';
 import {
     Table,
     TableBody,
@@ -17,12 +17,14 @@ import { Separator } from '@radix-ui/react-separator';
 import { useState } from 'react';
 import CreateTodoDialog from '@/components/todo/create-todo-dialog'
 import TodoDetailDialog from './todo-detail-dialog';
+import DeleteTodoConfirmationDialog from '@/components/todo/delete-todo-confirmation-dialog';
 
 
 const TodoIndex = () => {
     const { group, todos } = usePage().props
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [showTodoDetail, setShowTodoDetail] = useState(false)
+    const [todoToDelete, setTodoToDelete] = useState(null)
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -38,8 +40,10 @@ const TodoIndex = () => {
             {/* CREATE NEW TODO DIALOG */}
             <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id} />
 
+            {todoToDelete ? <DeleteTodoConfirmationDialog todo={todoToDelete} onConfirm={() => router.delete(route('todo.delete', todoToDelete.id))} onClose={() => setTodoToDelete(null)}/> : null}
+
             {/* SHOW TODO DETAIL DIALOG  */}
-            {showTodoDetail ? (<TodoDetailDialog todo={showTodoDetail} onClose={() => setShowTodoDetail(null)}/>) : null}
+            {showTodoDetail ? (<TodoDetailDialog todo={showTodoDetail} onClose={() => setShowTodoDetail(null)} />) : null}
 
             {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
@@ -63,6 +67,7 @@ const TodoIndex = () => {
                             <TableHead className="w-[100px]">Title</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead>Created At</TableHead>
+                            <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -72,6 +77,9 @@ const TodoIndex = () => {
                                     <TableCell className="font-medium truncate max-w-[200px] cursor-pointer" onClick={() => setShowTodoDetail(item)}>{item.title}</TableCell>
                                     <TableCell className="truncate max-w-[400px]">{item.description}</TableCell>
                                     <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
+                                    <TableCell>
+                                        <Button size={'sm'} variant={'link'} className='text-red-400 cursor-pointer' onClick={() => setTodoToDelete(item)}>Delete</Button>
+                                    </TableCell>
                                 </TableRow>
                             ))
                         }
