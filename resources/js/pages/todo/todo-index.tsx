@@ -63,6 +63,7 @@ const TodoIndex = () => {
                             <TableHead className="w-[100px]">Title</TableHead>
                             <TableHead>Description</TableHead>
                             <TableHead>Created At</TableHead>
+                            <TableHead>Actions</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -72,6 +73,9 @@ const TodoIndex = () => {
                                     <TableCell className="font-medium truncate max-w-[200px] cursor-pointer" onClick={() => setShowTodoDetail(item)}>{item.title}</TableCell>
                                     <TableCell className="truncate max-w-[400px]">{item.description}</TableCell>
                                     <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
+                                    <TableCell>
+                                        <Button size={'sm'} variant={'link'} className='text-red-400 cursor-pointer'>Delete</Button>
+                                    </TableCell>
                                 </TableRow>
                             ))
                         }
