@@ -16,11 +16,13 @@ import { Plus } from 'lucide-react';
 import { Separator } from '@radix-ui/react-separator';
 import { useState } from 'react';
 import CreateTodoDialog from '@/components/todo/create-todo-dialog'
+import TodoDetailDialog from './todo-detail-dialog';
 
 
 const TodoIndex = () => {
     const { group, todos } = usePage().props
     const [showCreateDialog, setShowCreateDialog] = useState(false)
+    const [showTodoDetail, setShowTodoDetail] = useState(false)
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -34,7 +36,10 @@ const TodoIndex = () => {
             <Head title={`${group.name} todos`} />
 
             {/* CREATE NEW TODO DIALOG */}
-            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id}/>
+            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id} />
+
+            {/* SHOW TODO DETAIL DIALOG  */}
+            {showTodoDetail ? (<TodoDetailDialog todo={showTodoDetail} onClose={() => setShowTodoDetail(null)}/>) : null}
 
             {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
@@ -64,7 +69,7 @@ const TodoIndex = () => {
                         {
                             todos.map((item) => (
                                 <TableRow key={item.id}>
-                                    <TableCell className="font-medium truncate max-w-[200px]">{item.title}</TableCell>
+                                    <TableCell className="font-medium truncate max-w-[200px] cursor-pointer" onClick={() => setShowTodoDetail(item)}>{item.title}</TableCell>
                                     <TableCell className="truncate max-w-[400px]">{item.description}</TableCell>
                                     <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
                                 </TableRow>
