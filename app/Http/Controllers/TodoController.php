@@ -71,6 +71,8 @@ class TodoController extends Controller
      */
     public function destroy(Todo $todo)
     {
-        //
+        $todo->delete();
+
+        return back()->with('toast.success', 'Todo deleted successfully.');
     }
 }
