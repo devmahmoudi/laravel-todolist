@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog"
 
 const CreateTodoDialog = ({ open, setOpen, groupId }) => {
-    const { data, setData, post, processing, errors } = useForm({
+    const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         description: '',
         group_id: groupId
@@ -28,7 +28,11 @@ const CreateTodoDialog = ({ open, setOpen, groupId }) => {
     const handleSubmit = () => {
         post(
             route('todo.store'), {
-            onSuccess: () => setOpen(false)
+            onSuccess: () => {
+                setOpen(false)
+
+                reset()
+            }
         }
         )
     }
