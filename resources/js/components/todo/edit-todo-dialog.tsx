@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "@inertiajs/react";
-import { ChangeEvent, useEffect } from "react";
+import { ChangeEvent, useEffect, useRef } from "react";
 import { ClipLoader } from "react-spinners"
 import {
     Dialog,
@@ -13,6 +13,7 @@ import {
     DialogDescription,
     DialogHeader,
     DialogTitle,
+    DialogClose,
     DialogTrigger,
 } from "@/components/ui/dialog"
 
@@ -23,12 +24,18 @@ interface Todo {
     group_id: number;
 }
 
-const EditTodoDialog = ({ open, setOpen, todo }: { open: boolean; setOpen: (open: boolean) => void; todo: Todo }) => {
+const EditTodoDialog = ({ todo, onClose }: { todo: Todo, onClose(): void }) => {
     const { data, setData, put, processing, errors, reset } = useForm({
         title: todo?.title || '',
         description: todo?.description || '',
         group_id: todo?.group_id || 0
     })
+
+    const triggerRef = useRef(null)
+
+    useEffect(() => {
+        triggerRef.current?.click()
+    }, [])
 
     useEffect(() => {
         if (todo) {
@@ -46,15 +53,16 @@ const EditTodoDialog = ({ open, setOpen, todo }: { open: boolean; setOpen: (open
         put(
             route('todo.update', todo.id), {
             onSuccess: () => {
-                setOpen(false)
                 reset()
+                onClose()
             }
         }
         )
     }
 
     return (
-        <Dialog open={open} onOpenChange={() => setOpen(false)}>
+        <Dialog onOpenChange={(open) => !open ? onClose() : null}>
+            <DialogTrigger ref={triggerRef} className="invisible h-0">Open</DialogTrigger>
             <DialogContent>
                 <h1>Edit todo</h1>
                 <Separator />
@@ -91,12 +99,12 @@ const EditTodoDialog = ({ open, setOpen, todo }: { open: boolean; setOpen: (open
                 </div>
 
                 <div className="flex gap-2 justify-end">
-                    <Button className="cursor-pointer" onClick={handleSubmit}>
+                    <Button className="cursor-pointer bg-blue-500 text-white" onClick={handleSubmit}>
                         {
-                            processing ? <ClipLoader size={20}/> : <span>Update</span>
+                            processing ? <ClipLoader size={20} /> : <span>Update</span>
                         }
                     </Button>
-                    <Button className="cursor-pointer bg-yellow-300 border-white" onClick={() => setOpen(false)}>Cancel</Button>
+                    <Button className="cursor-pointer bg-yellow-300 border-white" onClick={() => onClose()}>Cancel</Button>
                 </div>
             </DialogContent>
         </Dialog>
