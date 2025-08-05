@@ -18,6 +18,7 @@ import { useState } from 'react';
 import CreateTodoDialog from '@/components/todo/create-todo-dialog'
 import TodoDetailDialog from '../../components/todo/todo-detail-dialog';
 import DeleteTodoConfirmationDialog from '@/components/todo/delete-todo-confirmation-dialog';
+import EditTodoDialog from '@/components/todo/edit-todo-dialog';
 
 
 const TodoIndex = () => {
@@ -25,6 +26,7 @@ const TodoIndex = () => {
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [showTodoDetail, setShowTodoDetail] = useState(false)
     const [todoToDelete, setTodoToDelete] = useState(null)
+    const [todoToEdit, setTodoToEdit] = useState(null)
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -40,7 +42,11 @@ const TodoIndex = () => {
             {/* CREATE NEW TODO DIALOG */}
             <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id} />
 
+            {/* DELETE TODO CONFIRMATION DIALOG */}
             {todoToDelete ? <DeleteTodoConfirmationDialog todo={todoToDelete} onConfirm={() => router.delete(route('todo.delete', todoToDelete.id))} onClose={() => setTodoToDelete(null)}/> : null}
+
+            {/* EDIT TODO DIALOG */}
+            {todoToEdit ? <EditTodoDialog todo={todoToEdit} onClose={() => setTodoToEdit(null)}/> : null}
 
             {/* SHOW TODO DETAIL DIALOG  */}
             {showTodoDetail ? (<TodoDetailDialog todo={showTodoDetail} onClose={() => setShowTodoDetail(null)} />) : null}
@@ -79,6 +85,7 @@ const TodoIndex = () => {
                                     <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
                                     <TableCell>
                                         <Button size={'sm'} variant={'link'} className='text-red-400 cursor-pointer' onClick={() => setTodoToDelete(item)}>Delete</Button>
+                                        <Button size={'sm'} variant={'link'} className='text-blue-400 cursor-pointer' onClick={() => setTodoToEdit(item)}>Edit</Button>
                                     </TableCell>
                                 </TableRow>
                             ))
