@@ -6,8 +6,9 @@ use App\Models\Todo;
 use Inertia\Inertia;
 use App\Models\Group;
 use Illuminate\Http\Request;
-use App\Http\Requests\StoreTodoRequest;
 use Illuminate\Support\Facades\Log;
+use App\Http\Requests\StoreTodoRequest;
+use App\Http\Requests\UpdateTodoRequest;
 
 class TodoController extends Controller
 {
@@ -51,19 +52,13 @@ class TodoController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Todo $todo)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Todo $todo)
+    public function update(UpdateTodoRequest $request, Todo $todo)
     {
-        //
+        $todo->update($request->validated());
+
+        return back()->with('toast.success', 'Todo updated successfully.');
     }
 
     /**
