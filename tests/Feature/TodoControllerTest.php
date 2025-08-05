@@ -88,4 +88,188 @@ class TodoControllerTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('toast.success', 'Todo deleted successfully.');
     }
+
+    public function test_update_todo_updates_todo_and_redirects_with_success_message()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Original Title',
+            'description' => 'Original description',
+        ]);
+        
+        $this->actingAs($user);
+
+        $updateData = [
+            'title' => 'Updated Title',
+            'description' => 'Updated description',
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $this->assertDatabaseHas('todos', [
+            'id' => $todo->id,
+            'title' => 'Updated Title',
+            'description' => 'Updated description',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo updated successfully.');
+    }
+
+    public function test_update_todo_with_only_title()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Original Title',
+            'description' => 'Original description',
+        ]);
+        
+        $this->actingAs($user);
+
+        $updateData = [
+            'title' => 'Updated Title Only',
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $this->assertDatabaseHas('todos', [
+            'id' => $todo->id,
+            'title' => 'Updated Title Only',
+            'description' => 'Original description', // Should remain unchanged
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo updated successfully.');
+    }
+
+    public function test_update_todo_with_null_description()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Original Title',
+            'description' => 'Original description',
+        ]);
+        
+        $this->actingAs($user);
+
+        $updateData = [
+            'title' => 'Updated Title',
+            'description' => null,
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $this->assertDatabaseHas('todos', [
+            'id' => $todo->id,
+            'title' => 'Updated Title',
+            'description' => null,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo updated successfully.');
+    }
+
+    public function test_update_todo_validation_requires_title()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create();
+        
+        $this->actingAs($user);
+
+        $updateData = [
+            'description' => 'Updated description',
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $response->assertSessionHasErrors(['title']);
+    }
+
+    public function test_update_todo_validation_title_max_length()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create();
+        
+        $this->actingAs($user);
+
+        $updateData = [
+            'title' => str_repeat('a', 256), // Exceeds 255 character limit
+            'description' => 'Updated description',
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $response->assertSessionHasErrors(['title']);
+    }
+
+    public function test_update_todo_validation_title_must_be_string()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create();
+        
+        $this->actingAs($user);
+
+        $updateData = [
+            'title' => 123, // Not a string
+            'description' => 'Updated description',
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $response->assertSessionHasErrors(['title']);
+    }
+
+    public function test_update_todo_validation_description_must_be_string()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create();
+        
+        $this->actingAs($user);
+
+        $updateData = [
+            'title' => 'Updated Title',
+            'description' => 123, // Not a string
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $response->assertSessionHasErrors(['description']);
+    }
+
+    public function test_update_todo_authorization_requires_authenticated_user()
+    {
+        $group = Group::factory()->create();
+        $todo = Todo::factory()->for($group)->create();
+
+        $updateData = [
+            'title' => 'Updated Title',
+            'description' => 'Updated description',
+        ];
+
+        $response = $this->put(route('todo.update', $todo->id), $updateData);
+
+        $response->assertRedirect('/login');
+    }
+
+    public function test_update_todo_returns_404_for_nonexistent_todo()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $updateData = [
+            'title' => 'Updated Title',
+            'description' => 'Updated description',
+        ];
+
+        $response = $this->put(route('todo.update', 99999), $updateData);
+
+        $response->assertNotFound();
+    }
 }
