@@ -1,24 +1,12 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, Link, router, usePage } from '@inertiajs/react';
-import {
-    Table,
-    TableBody,
-    TableCaption,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table"
-import { dateFnsFormat } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { Separator } from '@radix-ui/react-separator';
+import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import CreateTodoDialog from '@/components/todo/create-todo-dialog'
 import TodoDetailDialog from '../../components/todo/todo-detail-dialog';
 import DeleteTodoConfirmationDialog from '@/components/todo/delete-todo-confirmation-dialog';
 import EditTodoDialog from '@/components/todo/edit-todo-dialog';
+import TodoTable from '@/components/todo/todo-table';
 
 
 const TodoIndex = () => {
@@ -53,49 +41,7 @@ const TodoIndex = () => {
 
             {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
-                <Table>
-                    <TableCaption>
-                        <div className='grid gap-3'>
-                            {!todos.length && (
-                                <p>There are no todos in this group</p>
-                            )}
-                            <Separator className='border-white' />
-                            <div>
-                                <Button className='cursor-pointer' size={'sm'} onClick={() => setShowCreateDialog(true)}>
-                                    <Plus />
-                                    <span>Create new todo</span>
-                                </Button>
-                            </div>
-                        </div>
-                    </TableCaption>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead className="w-[100px]">Title</TableHead>
-                            <TableHead>Description</TableHead>
-                            <TableHead>Created At</TableHead>
-                            <TableHead>Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {
-                            todos.map((item) => (
-                                <TableRow key={item.id}>
-                                    <TableCell className="font-medium truncate max-w-[200px] cursor-pointer">
-                                        <Link href={route('todo.show', item.id)}>
-                                            {item.title}
-                                        </Link>
-                                    </TableCell>
-                                    <TableCell className="truncate max-w-[400px]">{item.description}</TableCell>
-                                    <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
-                                    <TableCell>
-                                        <Button size={'sm'} variant={'link'} className='text-red-400 cursor-pointer' onClick={() => setTodoToDelete(item)}>Delete</Button>
-                                        <Button size={'sm'} variant={'link'} className='text-blue-400 cursor-pointer' onClick={() => setTodoToEdit(item)}>Edit</Button>
-                                    </TableCell>
-                                </TableRow>
-                            ))
-                        }
-                    </TableBody>
-                </Table>
+                <TodoTable todos={todos} onClickNewTodoButton={() => setShowCreateDialog(true)} onDeleteTodo={setTodoToDelete} onEditTodo={setTodoToEdit} onShowDetail={setShowTodoDetail}/>
             </div>
         </AppLayout>
     );
