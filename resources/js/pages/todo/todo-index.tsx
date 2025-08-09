@@ -3,7 +3,6 @@ import { type BreadcrumbItem } from '@/types';
 import { Head, router, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import CreateTodoDialog from '@/components/todo/create-todo-dialog'
-import TodoDetailDialog from '../../components/todo/todo-detail-dialog';
 import DeleteTodoConfirmationDialog from '@/components/todo/delete-todo-confirmation-dialog';
 import EditTodoDialog from '@/components/todo/edit-todo-dialog';
 import TodoTable from '@/components/todo/todo-table';
@@ -12,7 +11,6 @@ import TodoTable from '@/components/todo/todo-table';
 const TodoIndex = () => {
     const { group, todos } = usePage().props
     const [showCreateDialog, setShowCreateDialog] = useState(false)
-    const [showTodoDetail, setShowTodoDetail] = useState(false)
     const [todoToDelete, setTodoToDelete] = useState(null)
     const [todoToEdit, setTodoToEdit] = useState(null)
 
@@ -35,9 +33,6 @@ const TodoIndex = () => {
 
             {/* EDIT TODO DIALOG */}
             {todoToEdit ? <EditTodoDialog todo={todoToEdit} onClose={() => setTodoToEdit(null)} /> : null}
-
-            {/* SHOW TODO DETAIL DIALOG  */}
-            {showTodoDetail ? (<TodoDetailDialog todo={showTodoDetail} onClose={() => setShowTodoDetail(null)} />) : null}
 
             {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
