@@ -272,4 +272,88 @@ class TodoControllerTest extends TestCase
 
         $response->assertNotFound();
     }
+
+    public function test_show_todo_renders_todo_detail_page()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create();
+        
+        $this->actingAs($user);
+
+        $response = $this->get(route('todo.show', $todo->id));
+
+        $response->assertInertia(fn (Assert $page) =>
+            $page->component('todo/todo-detail')
+        );
+    }
+
+    public function test_show_todo_passes_todo_data_to_page()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Test Todo Title',
+            'description' => 'Test Todo Description',
+        ]);
+        
+        $this->actingAs($user);
+
+        $response = $this->get(route('todo.show', $todo->id));
+
+        $response->assertInertia(fn (Assert $page) =>
+            $page->component('todo/todo-detail')
+                ->has('todo', fn (Assert $page) =>
+                    $page->where('id', $todo->id)
+                        ->where('title', 'Test Todo Title')
+                        ->where('description', 'Test Todo Description')
+                        ->where('group_id', $group->id)
+                        ->etc()
+                )
+        );
+    }
+
+    public function test_show_todo_requires_authenticated_user()
+    {
+        $group = Group::factory()->create();
+        $todo = Todo::factory()->for($group)->create();
+
+        $response = $this->get(route('todo.show', $todo->id));
+
+        $response->assertRedirect('/login');
+    }
+
+    public function test_show_todo_returns_404_for_nonexistent_todo()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->get(route('todo.show', 99999));
+
+        $response->assertNotFound();
+    }
+
+    public function test_show_todo_with_null_description()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Todo with no description',
+            'description' => null,
+        ]);
+        
+        $this->actingAs($user);
+
+        $response = $this->get(route('todo.show', $todo->id));
+
+        $response->assertInertia(fn (Assert $page) =>
+            $page->component('todo/todo-detail')
+                ->has('todo', fn (Assert $page) =>
+                    $page->where('id', $todo->id)
+                        ->where('title', 'Todo with no description')
+                        ->where('description', null)
+                        ->etc()
+                )
+        );
+    }
 }
