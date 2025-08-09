@@ -49,6 +49,7 @@ class TodoControllerTest extends TestCase
                         ->etc()
                 )
                 ->has('todos', $todoCount)
+                ->has('todos.0.children')
             );
     }
 
@@ -308,6 +309,7 @@ class TodoControllerTest extends TestCase
                         ->where('title', 'Test Todo Title')
                         ->where('description', 'Test Todo Description')
                         ->where('group_id', $group->id)
+                        ->has('children')
                         ->etc()
                 )
         );
@@ -352,6 +354,93 @@ class TodoControllerTest extends TestCase
                     $page->where('id', $todo->id)
                         ->where('title', 'Todo with no description')
                         ->where('description', null)
+                        ->has('children')
+                        ->etc()
+                )
+        );
+    }
+
+    public function test_todo_index_includes_children_in_todos()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        
+        // Create parent todo
+        $parentTodo = Todo::factory()->for($group)->create([
+            'title' => 'Parent Todo',
+            'description' => 'Parent description',
+        ]);
+        
+        // Create child todos
+        $childTodo1 = Todo::factory()->for($group)->create([
+            'title' => 'Child Todo 1',
+            'description' => 'Child description 1',
+            'parent_id' => $parentTodo->id,
+        ]);
+        
+        $childTodo2 = Todo::factory()->for($group)->create([
+            'title' => 'Child Todo 2',
+            'description' => 'Child description 2',
+            'parent_id' => $parentTodo->id,
+        ]);
+        
+        $this->actingAs($user);
+
+        $this->get(route('group.todo', $group->id))
+            ->assertInertia(fn (Assert $page) =>
+                $page->component('todo/todo-index')
+                ->has('todos', 3) // Parent + 2 children
+                ->has('todos.0.children')
+            );
+    }
+
+    public function test_show_todo_includes_children_data()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        
+        // Create parent todo
+        $parentTodo = Todo::factory()->for($group)->create([
+            'title' => 'Parent Todo',
+            'description' => 'Parent description',
+        ]);
+        
+        // Create child todos
+        $childTodo1 = Todo::factory()->for($group)->create([
+            'title' => 'Child Todo 1',
+            'description' => 'Child description 1',
+            'parent_id' => $parentTodo->id,
+        ]);
+        
+        $childTodo2 = Todo::factory()->for($group)->create([
+            'title' => 'Child Todo 2',
+            'description' => 'Child description 2',
+            'parent_id' => $parentTodo->id,
+        ]);
+        
+        $this->actingAs($user);
+
+        $response = $this->get(route('todo.show', $parentTodo->id));
+
+        $response->assertInertia(fn (Assert $page) =>
+            $page->component('todo/todo-detail')
+                ->has('todo', fn (Assert $page) =>
+                    $page->where('id', $parentTodo->id)
+                        ->where('title', 'Parent Todo')
+                        ->where('description', 'Parent description')
+                        ->has('children', 2)
+                        ->has('children.0', fn (Assert $page) =>
+                            $page->where('id', $childTodo1->id)
+                                ->where('title', 'Child Todo 1')
+                                ->where('parent_id', $parentTodo->id)
+                                ->etc()
+                        )
+                        ->has('children.1', fn (Assert $page) =>
+                            $page->where('id', $childTodo2->id)
+                                ->where('title', 'Child Todo 2')
+                                ->where('parent_id', $parentTodo->id)
+                                ->etc()
+                        )
                         ->etc()
                 )
         );

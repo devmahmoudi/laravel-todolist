@@ -19,7 +19,7 @@ class TodoController extends Controller
     {
         return Inertia::render('todo/todo-index', [
             'group' => $group,
-            'todos' => $group->todos
+            'todos' => $group->todos()->with('children')->get()
         ]);
     }
 
@@ -49,7 +49,7 @@ class TodoController extends Controller
     public function show(Todo $todo)
     {
         return Inertia::render('todo/todo-detail', [
-            'todo' => $todo
+            'todo' => $todo->load('children')
         ]);
     }
 
