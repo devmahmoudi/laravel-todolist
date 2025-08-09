@@ -1,6 +1,6 @@
 import AppLayout from '@/layouts/app-layout';
 import { type BreadcrumbItem } from '@/types';
-import { Head, router, usePage } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import {
     Table,
     TableBody,
@@ -43,10 +43,10 @@ const TodoIndex = () => {
             <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id} />
 
             {/* DELETE TODO CONFIRMATION DIALOG */}
-            {todoToDelete ? <DeleteTodoConfirmationDialog todo={todoToDelete} onConfirm={() => router.delete(route('todo.delete', todoToDelete.id))} onClose={() => setTodoToDelete(null)}/> : null}
+            {todoToDelete ? <DeleteTodoConfirmationDialog todo={todoToDelete} onConfirm={() => router.delete(route('todo.delete', todoToDelete.id))} onClose={() => setTodoToDelete(null)} /> : null}
 
             {/* EDIT TODO DIALOG */}
-            {todoToEdit ? <EditTodoDialog todo={todoToEdit} onClose={() => setTodoToEdit(null)}/> : null}
+            {todoToEdit ? <EditTodoDialog todo={todoToEdit} onClose={() => setTodoToEdit(null)} /> : null}
 
             {/* SHOW TODO DETAIL DIALOG  */}
             {showTodoDetail ? (<TodoDetailDialog todo={showTodoDetail} onClose={() => setShowTodoDetail(null)} />) : null}
@@ -80,7 +80,11 @@ const TodoIndex = () => {
                         {
                             todos.map((item) => (
                                 <TableRow key={item.id}>
-                                    <TableCell className="font-medium truncate max-w-[200px] cursor-pointer" onClick={() => setShowTodoDetail(item)}>{item.title}</TableCell>
+                                    <TableCell className="font-medium truncate max-w-[200px] cursor-pointer">
+                                        <Link href={route('todo.show', item.id)}>
+                                            {item.title}
+                                        </Link>
+                                    </TableCell>
                                     <TableCell className="truncate max-w-[400px]">{item.description}</TableCell>
                                     <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
                                     <TableCell>

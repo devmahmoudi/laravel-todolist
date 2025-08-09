@@ -23,6 +23,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     Route::post('/todo', [TodoController::class, 'store'])->name('todo.store');
     Route::get('/{group}/todo', [TodoController::class, 'index'])->name('group.todo');
+    Route::get('/todo/{todo}', [TodoController::class, 'show'])->name('todo.show');
     Route::put('/todo/{todo}', [TodoController::class, 'update'])->name('todo.update');
     Route::delete('/todo/{todo}', [TodoController::class, 'destroy'])->name('todo.delete');
 });
