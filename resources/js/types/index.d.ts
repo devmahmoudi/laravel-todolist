@@ -41,3 +41,26 @@ export interface User {
     updated_at: string;
     [key: string]: unknown; // This allows for additional properties...
 }
+
+export interface Group {
+    id: number;
+    name: string;
+    owner_id: number;
+    owner?: User;
+    todos?: Todo[];
+    created_at: string;
+    updated_at: string;
+}
+
+export interface Todo {
+    id: number;
+    title: string;
+    description: string | null;
+    parent_id: number | null;
+    group_id: number | null;
+    group?: Group;
+    parent?: Todo;
+    children?: Todo[];
+    created_at: string;
+    updated_at: string;
+}
