@@ -10,7 +10,7 @@ const TodoIndex = () => {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: `#${group.name} Todo`,
+            title: `# ${group.name}`,
             href: route('group.todo', group.id),
         },
     ];
