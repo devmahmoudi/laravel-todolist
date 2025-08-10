@@ -48,8 +48,11 @@ class TodoController extends Controller
      */
     public function show(Todo $todo)
     {
+        $todo->load('children');
+        
         return Inertia::render('todo/todo-detail', [
-            'todo' => $todo->load('children')
+            'todo' => $todo,
+            'ancestors' => $todo->ancestors()
         ]);
     }
 

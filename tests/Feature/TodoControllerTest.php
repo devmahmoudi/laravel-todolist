@@ -321,6 +321,7 @@ class TodoControllerTest extends TestCase
                         ->has('children')
                         ->etc()
                 )
+                ->has('ancestors')
         );
     }
 
@@ -364,6 +365,56 @@ class TodoControllerTest extends TestCase
                         ->where('title', 'Todo with no description')
                         ->where('description', null)
                         ->has('children')
+                        ->etc()
+                )
+                ->has('ancestors')
+        );
+    }
+
+    public function test_show_todo_includes_ancestors_data()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        
+        // Create a hierarchy: grandparent -> parent -> child
+        $grandparent = Todo::factory()->for($group)->create([
+            'title' => 'Grandparent Todo',
+            'description' => 'Grandparent description',
+        ]);
+        
+        $parent = Todo::factory()->for($group)->create([
+            'title' => 'Parent Todo',
+            'description' => 'Parent description',
+            'parent_id' => $grandparent->id,
+        ]);
+        
+        $child = Todo::factory()->for($group)->create([
+            'title' => 'Child Todo',
+            'description' => 'Child description',
+            'parent_id' => $parent->id,
+        ]);
+        
+        $this->actingAs($user);
+
+        $response = $this->get(route('todo.show', $child->id));
+
+        $response->assertInertia(fn (Assert $page) =>
+            $page->component('todo/todo-detail')
+                ->has('todo', fn (Assert $page) =>
+                    $page->where('id', $child->id)
+                        ->where('title', 'Child Todo')
+                        ->has('children')
+                        ->etc()
+                )
+                ->has('ancestors', 2) // 2 ancestors: grandparent and parent
+                ->has('ancestors.0', fn (Assert $page) =>
+                    $page->where('id', $grandparent->id)
+                        ->where('title', 'Grandparent Todo')
+                        ->etc()
+                )
+                ->has('ancestors.1', fn (Assert $page) =>
+                    $page->where('id', $parent->id)
+                        ->where('title', 'Parent Todo')
                         ->etc()
                 )
         );
@@ -457,6 +508,31 @@ class TodoControllerTest extends TestCase
                         )
                         ->etc()
                 )
+        );
+    }
+
+    public function test_show_todo_with_no_ancestors_returns_empty_ancestors()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Top Level Todo',
+            'description' => 'No parent',
+            'parent_id' => null,
+        ]);
+        
+        $this->actingAs($user);
+
+        $response = $this->get(route('todo.show', $todo->id));
+
+        $response->assertInertia(fn (Assert $page) =>
+            $page->component('todo/todo-detail')
+                ->has('todo', fn (Assert $page) =>
+                    $page->where('id', $todo->id)
+                        ->where('title', 'Top Level Todo')
+                        ->etc()
+                )
+                ->has('ancestors', 0) // No ancestors for top-level todo
         );
     }
 }
