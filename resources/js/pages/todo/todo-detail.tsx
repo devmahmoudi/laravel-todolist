@@ -4,17 +4,20 @@ import { Todo, type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
 import { Separator } from '@radix-ui/react-separator';
 
-const TodoDetail = ({ todo }: { todo: Todo }) => {
-
-    console.log(todo);
-    
+const TodoDetail = ({ todo, ancestors }: { todo: Todo, ancestors: Todo[] }) => {
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
-            title: `# Todo`,
-            href: route('todo.show', todo.id),
-        },
-    ];
+            title: `# ${todo.group?.name || 'Group'}`,
+            href: route('group.todo', todo.group?.id),
+        }
+    ].concat(ancestors.map(item => ({
+        title: `${item.title}`,
+        href: route('todo.show', item.id)
+    }))).concat([{
+        title: `${todo.title}`,
+        href: route('todo.show', todo.id),
+    }]);
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
