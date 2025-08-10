@@ -19,7 +19,7 @@ class TodoController extends Controller
     {
         return Inertia::render('todo/todo-index', [
             'group' => $group,
-            'todos' => $group->todos()->with('children')->get()
+            'todos' => $group->todos()->whereNull('parent_id')->with('children')->get()
         ]);
     }
 

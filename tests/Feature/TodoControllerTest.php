@@ -33,9 +33,18 @@ class TodoControllerTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $todoCount = rand(1, 10);
+        $topLevelTodoCount = rand(1, 5);
+        $childTodoCount = rand(2, 5);
 
-        $group = Group::factory()->for($user, 'owner')->has(Todo::factory()->count($todoCount))->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        
+        // Create top-level todos
+        $topLevelTodos = Todo::factory()->count($topLevelTodoCount)->for($group)->create();
+        
+        // Create child todos for the first top-level todo
+        Todo::factory()->count($childTodoCount)->for($group)->create([
+            'parent_id' => $topLevelTodos->first()->id
+        ]);
 
         $this->actingAs($user);
 
@@ -48,7 +57,7 @@ class TodoControllerTest extends TestCase
                         ->where('owner_id', $group->owner_id)
                         ->etc()
                 )
-                ->has('todos', $todoCount)
+                ->has('todos', $topLevelTodoCount) // Only top-level todos
                 ->has('todos.0.children')
             );
     }
@@ -389,8 +398,13 @@ class TodoControllerTest extends TestCase
         $this->get(route('group.todo', $group->id))
             ->assertInertia(fn (Assert $page) =>
                 $page->component('todo/todo-index')
-                ->has('todos', 3) // Parent + 2 children
-                ->has('todos.0.children')
+                ->has('todos', 1) // Only the parent todo (top-level)
+                ->has('todos.0.children', 2) // 2 children
+                ->has('todos.0', fn (Assert $page) =>
+                    $page->where('id', $parentTodo->id)
+                        ->where('title', 'Parent Todo')
+                        ->etc()
+                )
             );
     }
 
