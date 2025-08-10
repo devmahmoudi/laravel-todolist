@@ -21,14 +21,11 @@ import { router } from '@inertiajs/react';
 
 interface TodoTableProps {
     todos: Todo[];
-    group: Group;
-    onClickNewTodoButton: () => void;
-    onDeleteTodo: () => void;
-    onEditTodo: () => void;
-    onShowDetail: () => void;
+    groupId: number;
+    parentId: number|undefined;
 }
 
-const TodoTable = ({ todos, group }: TodoTableProps) => {
+const TodoTable = ({ todos, groupId, parentId }: TodoTableProps) => {
     const [showCreateDialog, setShowCreateDialog] = useState(false)
     const [todoToDelete, setTodoToDelete] = useState(null)
     const [todoToEdit, setTodoToEdit] = useState(null)
@@ -36,7 +33,7 @@ const TodoTable = ({ todos, group }: TodoTableProps) => {
     return (
         <>
             {/* CREATE NEW TODO DIALOG */}
-            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={group.id} />
+            <CreateTodoDialog open={showCreateDialog} setOpen={setShowCreateDialog} groupId={groupId} parentId={parentId}/>
 
             {/* DELETE TODO CONFIRMATION DIALOG */}
             {todoToDelete ? <DeleteTodoConfirmationDialog todo={todoToDelete} onConfirm={() => router.delete(route('todo.delete', todoToDelete.id))} onClose={() => setTodoToDelete(null)} /> : null}

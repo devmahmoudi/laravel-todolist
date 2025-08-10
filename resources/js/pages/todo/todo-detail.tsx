@@ -1,15 +1,13 @@
+import TodoTable from '@/components/todo/todo-table';
 import AppLayout from '@/layouts/app-layout';
-import { type BreadcrumbItem } from '@/types';
+import { Todo, type BreadcrumbItem } from '@/types';
 import { Head, Link, router, usePage } from '@inertiajs/react';
+import { Separator } from '@radix-ui/react-separator';
 
-interface Todo {
-    id: number;
-    title: string;
-    description: string;
-    group_id: number;
-}
+const TodoDetail = ({ todo }: { todo: Todo }) => {
 
-const TodoDetail = ({todo} : {todo: Todo}) => {
+    console.log(todo);
+    
 
     const breadcrumbs: BreadcrumbItem[] = [
         {
@@ -20,11 +18,23 @@ const TodoDetail = ({todo} : {todo: Todo}) => {
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>
-        <Head title={`${todo.title}`} />
+            <Head title={`${todo.title}`} />
 
-        <h1>
-            {todo.title}
-        </h1>
+            <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
+
+                <h3 className='text-xl'>
+                    {todo.title}
+                </h3>
+
+                <p>
+                    {todo.description}
+                </p>
+
+                <div>
+                    <h4 className="text-lg">Sub Todos</h4>
+                    <TodoTable todos={todo.children} groupId={todo.group_id} parentId={todo.id} />
+                </div>
+            </div>
         </AppLayout>
     )
 }

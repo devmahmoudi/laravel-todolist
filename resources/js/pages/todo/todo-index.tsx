@@ -21,7 +21,7 @@ const TodoIndex = () => {
 
             {/* TODOS TABLE */}
             <div className="flex h-full flex-1 flex-col gap-4 rounded-xl p-4 overflow-x-auto">
-                <TodoTable todos={todos} group={group}/>
+                <TodoTable todos={todos} groupId={group.id}/>
             </div>
         </AppLayout>
     );

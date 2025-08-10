@@ -16,11 +16,19 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 
-const CreateTodoDialog = ({ open, setOpen, groupId }) => {
+interface CreateTodoDialogProps {
+    open: boolean;
+    setOpen: () => void;
+    groupId: number;
+    parentId: number|undefined;
+}
+
+const CreateTodoDialog = ({ open, setOpen, groupId, parentId } : CreateTodoDialogProps) => {
     const { data, setData, post, processing, errors, reset } = useForm({
         title: '',
         description: '',
-        group_id: groupId
+        group_id: groupId,
+        parent_id: parentId
     })
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => setData({ ...data, [e.target.name]: e.target.value })
@@ -32,6 +40,9 @@ const CreateTodoDialog = ({ open, setOpen, groupId }) => {
                 setOpen(false)
 
                 reset()
+            },
+            onError: () => {
+                
             }
         }
         )
