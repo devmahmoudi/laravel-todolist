@@ -318,6 +318,7 @@ class TodoControllerTest extends TestCase
                         ->where('title', 'Test Todo Title')
                         ->where('description', 'Test Todo Description')
                         ->where('group_id', $group->id)
+                        ->has('group')
                         ->has('children')
                         ->etc()
                 )
