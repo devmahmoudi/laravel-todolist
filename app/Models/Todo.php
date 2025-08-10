@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Collection;
 
 class Todo extends Model
 {
@@ -29,5 +30,24 @@ class Todo extends Model
     public function children()
     {
         return $this->hasMany(Todo::class, 'parent_id');
+    }
+
+    /**
+     * Get all ancestors of the todo
+     * This method traverses up the parent hierarchy
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function ancestors(): \Illuminate\Support\Collection
+    {
+        $ancestors = collect();
+        $current = $this->parent;
+
+        while ($current) {
+            $ancestors->prepend($current); // Add to beginning to maintain order
+            $current = $current->parent;
+        }
+
+        return $ancestors; // Already in correct order: root to immediate parent
     }
 }
