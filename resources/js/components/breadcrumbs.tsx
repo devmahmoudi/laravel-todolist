@@ -22,7 +22,7 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                                                 <DropdownMenuTrigger>
                                                     {breadItem.trigger}
                                                 </DropdownMenuTrigger>
-                                                <DropdownMenuContent>
+                                                <DropdownMenuContent className='bg-black p-3 rounded-lg'>
                                                     {breadItem.items.map((item: SimpleBreadcrumbItem) => {
                                                         return (
                                                             <DropdownMenuItem className='p-1'>
