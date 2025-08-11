@@ -25,7 +25,7 @@ export function Breadcrumbs({ breadcrumbs }: { breadcrumbs: BreadcrumbItemType[]
                                                 <DropdownMenuContent>
                                                     {breadItem.items.map((item: SimpleBreadcrumbItem) => {
                                                         return (
-                                                            <DropdownMenuItem>
+                                                            <DropdownMenuItem className='p-1'>
                                                                 <Link href={item.href}>
                                                                     {item.title}
                                                                 </Link>
