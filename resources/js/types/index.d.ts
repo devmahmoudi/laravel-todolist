@@ -1,14 +1,23 @@
 import { LucideIcon } from 'lucide-react';
+import { ReactNode } from 'react';
 import type { Config } from 'ziggy-js';
 
 export interface Auth {
     user: User;
 }
 
-export interface BreadcrumbItem {
+
+export interface SimpleBreadcrumbItem {
     title: string;
     href: string;
 }
+
+export interface DropdownBreadcrumbItem {
+    trigger: string | ReactNode;
+    items: SimpleBreadcrumbItem[];
+}
+
+export type BreadcrumbItem = SimpleBreadcrumbItem | DropdownBreadcrumbItem;
 
 export interface NavGroup {
     title: string;
