@@ -1,13 +1,13 @@
-# 📝 Todo Management App  
+# 📝 Todo List App  
 
-**A Laravel + React task management system with nested todos, groups, and real-time UI interactions.**  
+**A Laravel + React task list system with nested todos, groups, and real-time UI interactions.**  
 
 ![App Demo](public/readme.png)
 
 ---
 
 ## ✨ Features  
-- ✅ **Nested Todo Management** - Full CRUD operations with hierarchical organization  
+- ✅ **Nested Todo List** - Full CRUD operations with hierarchical organization  
 - 📂 **Group System** - Create, rename, and delete task groups  
 - ✏️ **Inline Editing** - Edit todos/groups via intuitive modal dialogs  
 - 🗑️ **Safe Deletion** - Confirmation dialogs prevent accidental data loss  
