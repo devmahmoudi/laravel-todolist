@@ -36,7 +36,7 @@ jobs:
         with:
           context: ./vendor/laravel/sail/runtimes/8.4
           push: true
-          tags: user/app:latest
+          tags: devmahmoudi/laravel-todolist:latest
           build-args: |
             WWWGROUP=1000
             WWWUSER=1000
