@@ -4,8 +4,24 @@ on:
   push:
 
 jobs:
+  composer:
+    name: Composer install
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite, bcmath, soap, intl, gd, exif, iconv
+          coverage: none
+      
+      - name: Run composer install
+        run: composer install -n --prefer-dist
   docker:
     runs-on: ubuntu-latest
+    needs: composer
     steps:
       -
         name: Login to Docker Hub
