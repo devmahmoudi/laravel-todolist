@@ -23,5 +23,6 @@ jobs:
         name: Build and push
         uses: docker/build-push-action@v6
         with:
+          context: ./vendor/laravel/sail/runtimes/8.4
           push: true
           tags: user/app:latest
