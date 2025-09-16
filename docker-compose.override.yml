@@ -2,7 +2,7 @@ services:
   laravel.test:
     image: laravel-todolist-dev:latest 
     build:
-      context: ./vendor/laravel/sail/runtimes/8.4
+      context: ./docker/8.4
       dockerfile: Dockerfile
       args:
         WWWGROUP: '${WWWGROUP:-1000}'
