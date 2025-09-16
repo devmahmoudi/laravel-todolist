@@ -25,7 +25,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ./docker/8.4/Dockerfile
+          context: ./docker/8.4
           push: true
           tags: devmahmoudi/laravel-todolist:latest
           build-args: |
