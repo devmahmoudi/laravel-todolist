@@ -8,7 +8,7 @@ services:
         networks:
             - sail
         volumes:
-            - ./storage:/var/www/html/storage
+            - .:/var/www/html
         environment:
             WWWUSER: '${WWWUSER}'
             LARAVEL_SAIL: 1
