@@ -58,9 +58,9 @@ RUN apt-get update && apt-get upgrade -y \
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.4
 
 # Composer install & copy code sources
-COPY composer.json composer.lock ./
+COPY ../../composer.json ../../composer.lock ./
 RUN composer install -n --prefer-dist
-COPY . .
+COPY ../../. .
 
 RUN userdel -r ubuntu
 RUN groupadd --force -g $WWWGROUP sail
