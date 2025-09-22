@@ -4,6 +4,9 @@ on:
     #   - dev
   workflow_dispatch:
 
+env:
+  WWWGROUP: 1000   # define host group ID once, use everywhere
+
 jobs:
   build-and-push-docker-image:
     runs-on: ubuntu-latest
@@ -30,14 +33,18 @@ jobs:
           push: true
           tags: devmahmoudi/laravel-todolist:latest
           build-args: |
-            WWWGROUP=1000
-            WWWUSER=1000
+            WWWGROUP=${{ env.WWWGROUP }}
 
   Deploy:
     runs-on: staging
     needs: build-and-push-docker-image
     steps:
       - uses: actions/checkout@v5
+
+      - name: Fix storage/cache permissions
+        run: |
+          sudo chown -R 0:${{ env.WWWGROUP }} storage bootstrap/cache
+          sudo chmod -R 775 storage bootstrap/cache
 
       - name: Deploy containers
         run: docker compose -f docker-compose.yml up -d --pull always
