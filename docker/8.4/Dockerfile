@@ -58,8 +58,9 @@ RUN apt-get update && apt-get upgrade -y \
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.4
 
 # Composer install & copy code sources
-COPY composer.json composer.lock ./
+COPY composer.json composer.lock package-lock.json package.json ./
 RUN composer install -n --prefer-dist --no-scripts
+RUN npm ci --omit=dev --no-audit --no-fund
 COPY . .
 RUN composer du
 
