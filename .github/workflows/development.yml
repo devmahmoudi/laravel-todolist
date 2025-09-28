@@ -53,3 +53,6 @@ jobs:
 
       - name: Deploy containers
         run: docker compose -f docker-compose.yml up -d --pull always
+
+      - name: Run migrations
+        run: docker compose exec -T laravel.test php artisan migrate --force
