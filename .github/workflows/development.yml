@@ -41,6 +41,11 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Create .env file
+        run: |
+          cp .env.example .env
+          sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env
+
       - name: Fix storage/cache permissions
         run: |
           sudo chown -R 0:${{ env.WWWGROUP }} storage bootstrap/cache
