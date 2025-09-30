@@ -56,3 +56,6 @@ jobs:
 
       - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
+
+      - name: Run migrations
+        run: docker compose exec -T laravel.test npm run build
