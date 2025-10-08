@@ -48,8 +48,8 @@ jobs:
 
       - name: Fix storage/cache permissions
         run: |
-          sudo chown -R 0:${{ env.WWWGROUP }} storage bootstrap/cache
-          sudo chmod -R 775 storage bootstrap/cache
+          chown -R 0:${{ env.WWWGROUP }} storage bootstrap/cache
+          chmod -R 775 storage bootstrap/cache
 
       - name: Deploy containers
         run: docker compose -f docker-compose.yml up -d --pull always
