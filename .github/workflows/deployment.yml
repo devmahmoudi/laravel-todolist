@@ -8,7 +8,7 @@ env:
   WWWGROUP: 1000   # define host group ID once, use everywhere
 
 jobs:
-  build-and-push-docker-image:
+  Build-Image:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
@@ -36,8 +36,8 @@ jobs:
             WWWGROUP=${{ env.WWWGROUP }}
 
   Deploy:
-    runs-on: staging
-    needs: build-and-push-docker-image
+    runs-on: production
+    needs: Build-Image
     steps:
       - uses: actions/checkout@v5
 
