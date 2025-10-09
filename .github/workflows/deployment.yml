@@ -2,10 +2,11 @@ on:
   push:
     branches:
       - master
+
   workflow_dispatch:
 
 env:
-  WWWGROUP: 1000   # define host group ID once, use everywhere
+  WWWGROUP: 1000 # define host group ID once, use everywhere
 
 jobs:
   Build-Image:
@@ -51,11 +52,19 @@ jobs:
           chown -R 0:${{ env.WWWGROUP }} storage bootstrap/cache
           chmod -R 775 storage bootstrap/cache
 
+      - name: Stop old containers
+        run: docker compose down --remove-orphans || true
+
       - name: Deploy containers
-        run: docker compose -f docker-compose.yml up -d --pull always
+        run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans
 
       - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
 
-      - name: Run migrations
+      - name: Build frontend assets
         run: docker compose exec -T laravel.test npm run build
+
+      - name: Cleanup old Docker resources
+        if: always()
+        run: docker system prune -a -f --volumes
+
