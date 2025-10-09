@@ -2,7 +2,7 @@ on:
   push:
     branches:
       - master
-      - bugfix/deploy-prune-docker-space-left
+
   workflow_dispatch:
 
 env:
