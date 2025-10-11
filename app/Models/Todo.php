@@ -50,4 +50,15 @@ class Todo extends Model
 
         return $ancestors; // Already in correct order: root to immediate parent
     }
+
+    /**
+     * Returns root Todo of current which it's parent_id is null
+     * and is start point of hierarchy (First Todo)
+     *
+     * @return Todo|null
+     */
+    public function root(): ?Todo
+    {
+        return $this->ancestors()->first() ?? $this;
+    }
 }
