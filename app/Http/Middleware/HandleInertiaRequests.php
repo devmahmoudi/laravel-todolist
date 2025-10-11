@@ -3,8 +3,10 @@
 namespace App\Http\Middleware;
 
 use App\Models\Group;
+use App\Models\Todo;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 use Inertia\Middleware;
 use Tighten\Ziggy\Ziggy;
 
@@ -47,18 +49,37 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
-            'ziggy' => fn (): array => [
+            'ziggy' => fn(): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'groups' => fn () => Group::all(['id', 'name']),
-            'toasts' => function() use ($request){
+            'groups' => fn() => Group::all(['id', 'name']),
+            'toasts' => function () use ($request) {
                 return [
                     'success' => $request->session()->get('toast.success'),
                     'error' => $request->session()->get('toast.error'),
                 ];
-            }
+            },
+            'activeGroup' => $this->getActiveGroup(),
         ];
+    }
+
+    /**
+     * Returns active Group model if current route parameters
+     * has a parameter instance of Group or Todo model, otherwise returns null
+     *
+     * @return Group|null
+     */
+    public function getActiveGroup(): ?Group
+    {
+        foreach (Route::getCurrentRoute()->parameters() as $param) {
+            if ($param instanceof Todo)
+                return $param->group;
+            else if ($param instanceof Group)
+                return $param;
+        }
+
+        return null;
     }
 }
