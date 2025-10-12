@@ -26,6 +26,15 @@ class Todo extends Model
     ];
 
     /**
+     * The attributes that should be cast.
+     *
+     * @var array
+     */
+    protected $casts = [
+        'completed_at' => 'datetime',
+    ];
+
+    /**
      * The Todo's group
      *
      * @return BelongsTo
