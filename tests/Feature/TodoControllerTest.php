@@ -24,11 +24,12 @@ class TodoControllerTest extends TestCase
         $this->actingAs($user);
 
         $this->get(route('group.todo', $group->id))
-            ->assertInertia(fn (Assert $page) =>
+            ->assertInertia(
+                fn(Assert $page) =>
                 $page->component('todo/todo-index')
             );
     }
-    
+
     public function test_pass_group_and_todo_list_to_todo_index_page()
     {
         $user = User::factory()->create();
@@ -37,10 +38,10 @@ class TodoControllerTest extends TestCase
         $childTodoCount = rand(2, 5);
 
         $group = Group::factory()->for($user, 'owner')->create();
-        
+
         // Create top-level todos
         $topLevelTodos = Todo::factory()->count($topLevelTodoCount)->for($group)->create();
-        
+
         // Create child todos for the first top-level todo
         Todo::factory()->count($childTodoCount)->for($group)->create([
             'parent_id' => $topLevelTodos->first()->id
@@ -49,16 +50,19 @@ class TodoControllerTest extends TestCase
         $this->actingAs($user);
 
         $this->get(route('group.todo', $group->id))
-            ->assertInertia(fn (Assert $page) =>
+            ->assertInertia(
+                fn(Assert $page) =>
                 $page->component('todo/todo-index')
-                ->has('group', fn (Assert $page) =>
-                    $page->where('id', $group->id)
-                        ->where('name', $group->name)
-                        ->where('owner_id', $group->owner_id)
-                        ->etc()
-                )
-                ->has('todos', $topLevelTodoCount) // Only top-level todos
-                ->has('todos.0.children')
+                    ->has(
+                        'group',
+                        fn(Assert $page) =>
+                        $page->where('id', $group->id)
+                            ->where('name', $group->name)
+                            ->where('owner_id', $group->owner_id)
+                            ->etc()
+                    )
+                    ->has('todos', $topLevelTodoCount) // Only top-level todos
+                    ->has('todos.0.children')
             );
     }
 
@@ -88,7 +92,7 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
         $todo = Todo::factory()->for($group)->create();
-        
+
         $this->actingAs($user);
 
         $response = $this->delete(route('todo.delete', $todo->id));
@@ -107,7 +111,7 @@ class TodoControllerTest extends TestCase
             'title' => 'Original Title',
             'description' => 'Original description',
         ]);
-        
+
         $this->actingAs($user);
 
         $updateData = [
@@ -135,7 +139,7 @@ class TodoControllerTest extends TestCase
             'title' => 'Original Title',
             'description' => 'Original description',
         ]);
-        
+
         $this->actingAs($user);
 
         $updateData = [
@@ -162,7 +166,7 @@ class TodoControllerTest extends TestCase
             'title' => 'Original Title',
             'description' => 'Original description',
         ]);
-        
+
         $this->actingAs($user);
 
         $updateData = [
@@ -187,7 +191,7 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
         $todo = Todo::factory()->for($group)->create();
-        
+
         $this->actingAs($user);
 
         $updateData = [
@@ -204,7 +208,7 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
         $todo = Todo::factory()->for($group)->create();
-        
+
         $this->actingAs($user);
 
         $updateData = [
@@ -222,7 +226,7 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
         $todo = Todo::factory()->for($group)->create();
-        
+
         $this->actingAs($user);
 
         $updateData = [
@@ -240,7 +244,7 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
         $todo = Todo::factory()->for($group)->create();
-        
+
         $this->actingAs($user);
 
         $updateData = [
@@ -288,12 +292,13 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
         $todo = Todo::factory()->for($group)->create();
-        
+
         $this->actingAs($user);
 
         $response = $this->get(route('todo.show', $todo->id));
 
-        $response->assertInertia(fn (Assert $page) =>
+        $response->assertInertia(
+            fn(Assert $page) =>
             $page->component('todo/todo-detail')
         );
     }
@@ -306,14 +311,17 @@ class TodoControllerTest extends TestCase
             'title' => 'Test Todo Title',
             'description' => 'Test Todo Description',
         ]);
-        
+
         $this->actingAs($user);
 
         $response = $this->get(route('todo.show', $todo->id));
 
-        $response->assertInertia(fn (Assert $page) =>
+        $response->assertInertia(
+            fn(Assert $page) =>
             $page->component('todo/todo-detail')
-                ->has('todo', fn (Assert $page) =>
+                ->has(
+                    'todo',
+                    fn(Assert $page) =>
                     $page->where('id', $todo->id)
                         ->where('title', 'Test Todo Title')
                         ->where('description', 'Test Todo Description')
@@ -354,14 +362,17 @@ class TodoControllerTest extends TestCase
             'title' => 'Todo with no description',
             'description' => null,
         ]);
-        
+
         $this->actingAs($user);
 
         $response = $this->get(route('todo.show', $todo->id));
 
-        $response->assertInertia(fn (Assert $page) =>
+        $response->assertInertia(
+            fn(Assert $page) =>
             $page->component('todo/todo-detail')
-                ->has('todo', fn (Assert $page) =>
+                ->has(
+                    'todo',
+                    fn(Assert $page) =>
                     $page->where('id', $todo->id)
                         ->where('title', 'Todo with no description')
                         ->where('description', null)
@@ -376,44 +387,51 @@ class TodoControllerTest extends TestCase
     {
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
-        
+
         // Create a hierarchy: grandparent -> parent -> child
         $grandparent = Todo::factory()->for($group)->create([
             'title' => 'Grandparent Todo',
             'description' => 'Grandparent description',
         ]);
-        
+
         $parent = Todo::factory()->for($group)->create([
             'title' => 'Parent Todo',
             'description' => 'Parent description',
             'parent_id' => $grandparent->id,
         ]);
-        
+
         $child = Todo::factory()->for($group)->create([
             'title' => 'Child Todo',
             'description' => 'Child description',
             'parent_id' => $parent->id,
         ]);
-        
+
         $this->actingAs($user);
 
         $response = $this->get(route('todo.show', $child->id));
 
-        $response->assertInertia(fn (Assert $page) =>
+        $response->assertInertia(
+            fn(Assert $page) =>
             $page->component('todo/todo-detail')
-                ->has('todo', fn (Assert $page) =>
+                ->has(
+                    'todo',
+                    fn(Assert $page) =>
                     $page->where('id', $child->id)
                         ->where('title', 'Child Todo')
                         ->has('children')
                         ->etc()
                 )
                 ->has('ancestors', 2) // 2 ancestors: grandparent and parent
-                ->has('ancestors.0', fn (Assert $page) =>
+                ->has(
+                    'ancestors.0',
+                    fn(Assert $page) =>
                     $page->where('id', $grandparent->id)
                         ->where('title', 'Grandparent Todo')
                         ->etc()
                 )
-                ->has('ancestors.1', fn (Assert $page) =>
+                ->has(
+                    'ancestors.1',
+                    fn(Assert $page) =>
                     $page->where('id', $parent->id)
                         ->where('title', 'Parent Todo')
                         ->etc()
@@ -425,38 +443,41 @@ class TodoControllerTest extends TestCase
     {
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
-        
+
         // Create parent todo
         $parentTodo = Todo::factory()->for($group)->create([
             'title' => 'Parent Todo',
             'description' => 'Parent description',
         ]);
-        
+
         // Create child todos
         $childTodo1 = Todo::factory()->for($group)->create([
             'title' => 'Child Todo 1',
             'description' => 'Child description 1',
             'parent_id' => $parentTodo->id,
         ]);
-        
+
         $childTodo2 = Todo::factory()->for($group)->create([
             'title' => 'Child Todo 2',
             'description' => 'Child description 2',
             'parent_id' => $parentTodo->id,
         ]);
-        
+
         $this->actingAs($user);
 
         $this->get(route('group.todo', $group->id))
-            ->assertInertia(fn (Assert $page) =>
+            ->assertInertia(
+                fn(Assert $page) =>
                 $page->component('todo/todo-index')
-                ->has('todos', 1) // Only the parent todo (top-level)
-                ->has('todos.0.children', 2) // 2 children
-                ->has('todos.0', fn (Assert $page) =>
-                    $page->where('id', $parentTodo->id)
-                        ->where('title', 'Parent Todo')
-                        ->etc()
-                )
+                    ->has('todos', 1) // Only the parent todo (top-level)
+                    ->has('todos.0.children', 2) // 2 children
+                    ->has(
+                        'todos.0',
+                        fn(Assert $page) =>
+                        $page->where('id', $parentTodo->id)
+                            ->where('title', 'Parent Todo')
+                            ->etc()
+                    )
             );
     }
 
@@ -464,44 +485,51 @@ class TodoControllerTest extends TestCase
     {
         $user = User::factory()->create();
         $group = Group::factory()->for($user, 'owner')->create();
-        
+
         // Create parent todo
         $parentTodo = Todo::factory()->for($group)->create([
             'title' => 'Parent Todo',
             'description' => 'Parent description',
         ]);
-        
+
         // Create child todos
         $childTodo1 = Todo::factory()->for($group)->create([
             'title' => 'Child Todo 1',
             'description' => 'Child description 1',
             'parent_id' => $parentTodo->id,
         ]);
-        
+
         $childTodo2 = Todo::factory()->for($group)->create([
             'title' => 'Child Todo 2',
             'description' => 'Child description 2',
             'parent_id' => $parentTodo->id,
         ]);
-        
+
         $this->actingAs($user);
 
         $response = $this->get(route('todo.show', $parentTodo->id));
 
-        $response->assertInertia(fn (Assert $page) =>
+        $response->assertInertia(
+            fn(Assert $page) =>
             $page->component('todo/todo-detail')
-                ->has('todo', fn (Assert $page) =>
+                ->has(
+                    'todo',
+                    fn(Assert $page) =>
                     $page->where('id', $parentTodo->id)
                         ->where('title', 'Parent Todo')
                         ->where('description', 'Parent description')
                         ->has('children', 2)
-                        ->has('children.0', fn (Assert $page) =>
+                        ->has(
+                            'children.0',
+                            fn(Assert $page) =>
                             $page->where('id', $childTodo1->id)
                                 ->where('title', 'Child Todo 1')
                                 ->where('parent_id', $parentTodo->id)
                                 ->etc()
                         )
-                        ->has('children.1', fn (Assert $page) =>
+                        ->has(
+                            'children.1',
+                            fn(Assert $page) =>
                             $page->where('id', $childTodo2->id)
                                 ->where('title', 'Child Todo 2')
                                 ->where('parent_id', $parentTodo->id)
@@ -521,19 +549,170 @@ class TodoControllerTest extends TestCase
             'description' => 'No parent',
             'parent_id' => null,
         ]);
-        
+
         $this->actingAs($user);
 
         $response = $this->get(route('todo.show', $todo->id));
 
-        $response->assertInertia(fn (Assert $page) =>
+        $response->assertInertia(
+            fn(Assert $page) =>
             $page->component('todo/todo-detail')
-                ->has('todo', fn (Assert $page) =>
+                ->has(
+                    'todo',
+                    fn(Assert $page) =>
                     $page->where('id', $todo->id)
                         ->where('title', 'Top Level Todo')
                         ->etc()
                 )
                 ->has('ancestors', 0) // No ancestors for top-level todo
         );
+    }
+
+    public function test_toggle_completed_marks_incomplete_todo_as_completed()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Test Todo',
+            'completed_at' => null,
+        ]);
+
+        $this->actingAs($user);
+
+        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+
+        $this->assertDatabaseHas('todos', [
+            'id' => $todo->id,
+            'completed_at' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
+    }
+
+    public function test_toggle_completed_marks_completed_todo_as_incomplete()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $completedAt = now()->subDays(1);
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Test Todo',
+            'completed_at' => $completedAt,
+        ]);
+
+        $this->actingAs($user);
+
+        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+
+        $this->assertDatabaseHas('todos', [
+            'id' => $todo->id,
+            'completed_at' => null,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo marked as incomplete.');
+    }
+
+    public function test_toggle_completed_requires_authenticated_user()
+    {
+        $group = Group::factory()->create();
+        $todo = Todo::factory()->for($group)->create();
+
+        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+
+        $response->assertRedirect('/login');
+    }
+
+    public function test_toggle_completed_returns_404_for_nonexistent_todo()
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        $response = $this->patch(route('todo.toggle-completed', 99999));
+
+        $response->assertNotFound();
+    }
+
+    public function test_toggle_completed_updates_todo_with_current_timestamp()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Test Todo',
+            'completed_at' => null,
+        ]);
+
+        $this->actingAs($user);
+
+        $beforeToggle = now()->subSecond();
+        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+        $afterToggle = now()->addSecond();
+
+        $todo->refresh();
+
+        $this->assertNotNull($todo->completed_at);
+        $this->assertTrue($todo->completed_at->between($beforeToggle, $afterToggle));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
+    }
+
+    public function test_toggle_completed_preserves_other_todo_attributes()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+        $todo = Todo::factory()->for($group)->create([
+            'title' => 'Test Todo',
+            'description' => 'Test Description',
+            'completed_at' => null,
+        ]);
+
+        $this->actingAs($user);
+
+        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+
+        $this->assertDatabaseHas('todos', [
+            'id' => $todo->id,
+            'title' => 'Test Todo',
+            'description' => 'Test Description',
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
+    }
+
+    public function test_toggle_completed_works_with_child_todos()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+
+        $parentTodo = Todo::factory()->for($group)->create([
+            'title' => 'Parent Todo',
+            'completed_at' => null,
+        ]);
+
+        $childTodo = Todo::factory()->for($group)->create([
+            'title' => 'Child Todo',
+            'parent_id' => $parentTodo->id,
+            'completed_at' => null,
+        ]);
+
+        $this->actingAs($user);
+
+        $response = $this->patch(route('todo.toggle-completed', $childTodo->id));
+
+        $this->assertDatabaseHas('todos', [
+            'id' => $childTodo->id,
+            'completed_at' => now()->format('Y-m-d H:i:s'),
+        ]);
+
+        // Parent should remain unchanged
+        $this->assertDatabaseHas('todos', [
+            'id' => $parentTodo->id,
+            'completed_at' => null,
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
     }
 }
