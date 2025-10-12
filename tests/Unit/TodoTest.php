@@ -127,4 +127,23 @@ class TodoTest extends TestCase
         $this->assertEquals($level3->id, $ancestors->get(2)->id);
         $this->assertEquals($level4->id, $ancestors->get(3)->id);
     }
+
+    public function test_todo_root_returns_itself_if_no_ancestor()
+    {
+        $group = Group::factory()->create();
+        $root = Todo::factory()->for($group)->create(['parent_id' => null, 'title' => 'Root Todo']);
+        $this->assertEquals($root->id, $root->root()->id);
+        $this->assertEquals('Root Todo', $root->root()->title);
+    }
+
+    public function test_todo_root_returns_the_top_ancestor()
+    {
+        $group = Group::factory()->create();
+        // Build a hierarchy: root -> child -> grandchild
+        $root = Todo::factory()->for($group)->create(['parent_id' => null, 'title' => 'Root Todo']);
+        $child = Todo::factory()->for($group)->create(['parent_id' => $root->id, 'title' => 'Child Todo']);
+        $grandchild = Todo::factory()->for($group)->create(['parent_id' => $child->id, 'title' => 'Grandchild Todo']);
+        $this->assertEquals($root->id, $grandchild->root()->id);
+        $this->assertEquals('Root Todo', $grandchild->root()->title);
+    }
 } 
