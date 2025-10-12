@@ -24,6 +24,7 @@ class UpdateTodoRequest extends FormRequest
         return [
             'title' => ['required', 'string', 'max:255'],
             'description' => ['string', 'nullable'],
+            'completed_at' => ['nullable', 'date']
         ];
     }
 }
