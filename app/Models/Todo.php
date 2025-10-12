@@ -22,6 +22,7 @@ class Todo extends Model
         'description',
         'parent_id',
         'group_id',
+        'completed_at',
     ];
 
     /**
@@ -82,5 +83,45 @@ class Todo extends Model
     public function root(): ?Todo
     {
         return $this->ancestors()->first() ?? $this;
+    }
+
+    /**
+     * Check if the todo is completed
+     *
+     * @return bool
+     */
+    public function isCompleted(): bool
+    {
+        return !is_null($this->completed_at);
+    }
+
+    /**
+     * Mark the todo as completed
+     *
+     * @return bool
+     */
+    public function markAsCompleted(): bool
+    {
+        return $this->update(['completed_at' => now()]);
+    }
+
+    /**
+     * Mark the todo as incomplete
+     *
+     * @return bool
+     */
+    public function markAsIncomplete(): bool
+    {
+        return $this->update(['completed_at' => null]);
+    }
+
+    /**
+     * Toggle the completion status of the todo
+     *
+     * @return bool
+     */
+    public function toggleCompletion(): bool
+    {
+        return $this->isCompleted() ? $this->markAsIncomplete() : $this->markAsCompleted();
     }
 }
