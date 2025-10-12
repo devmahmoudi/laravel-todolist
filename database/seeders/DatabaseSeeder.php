@@ -26,8 +26,9 @@ class DatabaseSeeder extends Seeder
         \App\Models\User::factory(5)->create()->each(function ($user) {
             $groups = \App\Models\Group::factory(2)->create(['owner_id' => $user->id]);
             $groups->each(function ($group) {
-                // Each group gets 3 todos
-                \App\Models\Todo::factory(3)->create(['group_id' => $group->id]);
+                // Each group gets 3 todos - mix of completed and incomplete
+                \App\Models\Todo::factory(2)->incomplete()->create(['group_id' => $group->id]);
+                \App\Models\Todo::factory(1)->completed()->create(['group_id' => $group->id]);
             });
         });
     }
