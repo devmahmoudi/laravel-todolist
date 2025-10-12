@@ -5,11 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Todo extends Model
 {
     use HasFactory;
 
+    /**
+     * Define fillable props
+     *
+     * @var array
+     */
     protected $fillable = [
         'title',
         'description',
@@ -17,17 +24,32 @@ class Todo extends Model
         'group_id',
     ];
 
-    public function group()
+    /**
+     * The Todo's group
+     *
+     * @return BelongsTo
+     */
+    public function group(): BelongsTo
     {
         return $this->belongsTo(Group::class, 'group_id');
     }
 
-    public function parent()
+    /**
+     * The Todo's parent
+     *
+     * @return BelongsTo
+     */
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(Todo::class, 'parent_id');
     }
 
-    public function children()
+    /**
+     * The Todo's children
+     *
+     * @return HasMany
+     */
+    public function children(): HasMany
     {
         return $this->hasMany(Todo::class, 'parent_id');
     }
