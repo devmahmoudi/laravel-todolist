@@ -5,7 +5,7 @@ import CreateGroup from '@/components/group/create-group'
 
 const GroupsList = ({setDisplayCreateGroupInput, displayCreateGroupInput}) => {
     const page = usePage();
-    const { groups } = page.props
+    const { groups, activeGroup } = page.props
 
     return (
         <>
@@ -15,7 +15,7 @@ const GroupsList = ({setDisplayCreateGroupInput, displayCreateGroupInput}) => {
                 ))
             }
             {groups.map((item) => (
-                <GroupItem item={item} key={item.id} />
+                <GroupItem item={item} isActive={activeGroup && item.id == activeGroup.id} key={item.id} />
             ))}
         </>
     )
