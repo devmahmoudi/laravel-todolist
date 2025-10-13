@@ -77,7 +77,7 @@ const TodoTable = ({ todos, groupId, parentId }: TodoTableProps) => {
                         <TableRow key={item.id}>
                             <TableCell className="cursor-pointer truncate font-medium">
                                 <Checkbox
-                                    className="cursor-pointer"
+                                    className="cursor-pointer border-1 border-white"
                                     onClick={() => handleTodoCompletedToggle(item)}
                                     checked={Boolean(item.completed_at)}
                                 />
