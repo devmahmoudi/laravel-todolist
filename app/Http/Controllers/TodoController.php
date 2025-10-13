@@ -23,8 +23,8 @@ class TodoController extends Controller
     {
         return Inertia::render('todo/todo-index', [
             'group' => $group,
-            'todos' => $group->todos()->whereNull('parent_id')->with('children')->when(request()->has('completed'), function ($builder) {
-                $builder->withoutGlobalScope(IncompleteScope::class);
+            'todos' => $group->todos()->whereNull('parent_id')->with('children')->when(!request()->has('completed'), function ($builder) {
+                $builder->incomplete();
             })->get()
         ]);
     }
