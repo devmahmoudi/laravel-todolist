@@ -587,7 +587,7 @@ class TodoControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
+        $response->assertSessionHas('toast.success', 'Todo marked as completed');
     }
 
     public function test_toggle_completed_marks_completed_todo_as_incomplete()
@@ -610,7 +610,7 @@ class TodoControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as incomplete.');
+        $response->assertSessionHas('toast.success', 'Todo marked as incomplete');
     }
 
     public function test_toggle_completed_requires_authenticated_user()
@@ -654,7 +654,7 @@ class TodoControllerTest extends TestCase
         $this->assertTrue($todo->completed_at->between($beforeToggle, $afterToggle));
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
+        $response->assertSessionHas('toast.success', 'Todo marked as completed');
     }
 
     public function test_toggle_completed_preserves_other_todo_attributes()
@@ -678,7 +678,7 @@ class TodoControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
+        $response->assertSessionHas('toast.success', 'Todo marked as completed');
     }
 
     public function test_toggle_completed_works_with_child_todos()
@@ -713,6 +713,6 @@ class TodoControllerTest extends TestCase
         ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed.');
+        $response->assertSessionHas('toast.success', 'Todo marked as completed');
     }
 }
