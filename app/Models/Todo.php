@@ -2,15 +2,13 @@
 
 namespace App\Models;
 
-use App\Models\Scopes\IncompleteScope;
-use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Contracts\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[ScopedBy([IncompleteScope::class])]
 class Todo extends Model
 {
     use HasFactory;
@@ -135,5 +133,17 @@ class Todo extends Model
     public function toggleCompletion(): bool
     {
         return $this->isCompleted() ? $this->markAsIncomplete() : $this->markAsCompleted();
+    }
+
+    /**
+     * Select only incomplete todos
+     *
+     * @param Builder $builder
+     * @return void
+     */
+    #[Scope]
+    protected function incomplete(Builder $builder):void
+    {
+        $builder->whereNull('completed_at');
     }
 }
