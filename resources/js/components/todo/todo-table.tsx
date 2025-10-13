@@ -2,13 +2,14 @@ import CreateTodoDialog from '@/components/todo/create-todo-dialog';
 import DeleteTodoConfirmationDialog from '@/components/todo/delete-todo-confirmation-dialog';
 import EditTodoDialog from '@/components/todo/edit-todo-dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { dateFnsFormat } from '@/lib/utils';
 import { Todo } from '@/types';
 import { Link, router, useForm } from '@inertiajs/react';
 import { Separator } from '@radix-ui/react-separator';
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Checkbox } from '../ui/checkbox';
 
 interface TodoTableProps {
@@ -21,8 +22,22 @@ const TodoTable = ({ todos, groupId, parentId }: TodoTableProps) => {
     const [showCreateDialog, setShowCreateDialog] = useState(false);
     const [todoToDelete, setTodoToDelete] = useState(null);
     const [todoToEdit, setTodoToEdit] = useState(null);
+    const [includeIncomplete, setIncludeIncomlete] = useState(false);
 
     const { patch, processing, errors } = useForm({});
+
+    useEffect(() => {
+        const url = new URL(window.location.href);
+        const params = url.searchParams;
+
+        if(includeIncomplete)
+            params.set('completed', '1');
+        else
+            params.delete('completed');
+
+        if(window.location.href != url.toString())
+            router.visit(url.toString(), {preserveState: true})
+    }, [includeIncomplete]);
 
     /**
      * Sends request to server for toggle todo's completed status
@@ -49,6 +64,17 @@ const TodoTable = ({ todos, groupId, parentId }: TodoTableProps) => {
 
             {/* EDIT TODO DIALOG */}
             {todoToEdit ? <EditTodoDialog todo={todoToEdit} onClose={() => setTodoToEdit(null)} /> : null}
+
+            <div className="flex items-center space-x-2">
+                <Checkbox
+                    id="terms"
+                    checked={includeIncomplete}
+                    onClick={() => {
+                        setIncludeIncomlete(!includeIncomplete);
+                    }}
+                />
+                <Label htmlFor="terms">Include completed todos</Label>
+            </div>
 
             <Table>
                 <TableCaption>
