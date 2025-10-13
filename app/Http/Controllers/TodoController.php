@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
+use App\Models\Scopes\IncompleteScope;
+use Illuminate\Contracts\Database\Query\Builder;
 
 use function PHPUnit\Framework\isNull;
 
@@ -21,7 +23,9 @@ class TodoController extends Controller
     {
         return Inertia::render('todo/todo-index', [
             'group' => $group,
-            'todos' => $group->todos()->whereNull('parent_id')->with('children')->get()
+            'todos' => $group->todos()->whereNull('parent_id')->with('children')->when(request()->has('completed'), function ($builder) {
+                $builder->withoutGlobalScope(IncompleteScope::class);
+            })->get()
         ]);
     }
 
