@@ -43,7 +43,7 @@ class TodoControllerTest extends TestCase
         $topLevelTodos = Todo::factory()->count($topLevelTodoCount)->for($group)->create();
 
         // Create child todos for the first top-level todo
-        Todo::factory()->count($childTodoCount)->for($group)->create([
+        Todo::factory()->count($childTodoCount)->incomplete()->for($group)->create([
             'parent_id' => $topLevelTodos->first()->id
         ]);
 
