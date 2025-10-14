@@ -12,9 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('todos', function (Blueprint $table) {
-            $table->dropForeign('tasks_group_id_foreign');
-            $table->dropColumn('group_id');
-            $table->foreignId('group_id')->constrained()->cascadeOnDelete();
+            if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+                $table->dropForeign('tasks_group_id_foreign');
+                $table->dropColumn('group_id');
+                $table->foreignId('group_id')->constrained()->cascadeOnDelete();
+            } 
         });
     }
 
