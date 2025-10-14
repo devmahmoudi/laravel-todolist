@@ -28,7 +28,8 @@ class StoreTodoRequest extends FormRequest
             'title' => ['required', 'string', 'max:255'],
             'description' => ['string', 'nullable'],
             'group_id' => ['required', Rule::exists(Group::class, 'id')],
-            'parent_id' => ['nullable', Rule::exists(Todo::class, 'id')]
+            'parent_id' => ['nullable', Rule::exists(Todo::class, 'id')],
+            'completed_at' => ['nullable', 'date']
         ];
     }
 }

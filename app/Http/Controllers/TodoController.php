@@ -9,6 +9,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
+use App\Models\Scopes\IncompleteScope;
+use Illuminate\Contracts\Database\Query\Builder;
+
+use function PHPUnit\Framework\isNull;
 
 class TodoController extends Controller
 {
@@ -19,7 +23,9 @@ class TodoController extends Controller
     {
         return Inertia::render('todo/todo-index', [
             'group' => $group,
-            'todos' => $group->todos()->whereNull('parent_id')->with('children')->get()
+            'todos' => $group->todos()->whereNull('parent_id')->with('children')->when(!request()->has('completed'), function ($builder) {
+                $builder->incomplete();
+            })->get()
         ]);
     }
 
@@ -39,7 +45,7 @@ class TodoController extends Controller
         Todo::create(
             $request->validated()
         );
-       
+
         return back()->with('toast.success', 'Todo created successfully.');
     }
 
@@ -51,7 +57,7 @@ class TodoController extends Controller
         $todo->load('children');
 
         $todo->load('group');
-        
+
         return Inertia::render('todo/todo-detail', [
             'todo' => $todo,
             'ancestors' => $todo->ancestors()
@@ -76,5 +82,24 @@ class TodoController extends Controller
         $todo->delete();
 
         return back()->with('toast.success', 'Todo deleted successfully.');
+    }
+
+    /**
+     * Toggles Todo completed_at field
+     * 
+     * Sets now as todo's completed_at value if it
+     * is null, otherwise sets null
+     *
+     * @param Todo $todo
+     * @return void
+     */
+    public function toggleCompleted(Todo $todo)
+    {
+        if ($isIncomplete = is_null($todo->completed_at))
+            $todo->update(['completed_at' => now()]);
+        else
+            $todo->update(['completed_at' => null]);
+
+        return back()->with('toast.success', "Todo marked as " . ($isIncomplete ? "completed" : 'incomplete'));
     }
 }
