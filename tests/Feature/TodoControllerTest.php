@@ -40,7 +40,7 @@ class TodoControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create();
 
         // Create top-level todos
-        $topLevelTodos = Todo::factory()->count($topLevelTodoCount)->for($group)->create();
+        $topLevelTodos = Todo::factory()->count($topLevelTodoCount)->incomplete()->for($group)->create();
 
         // Create child todos for the first top-level todo
         Todo::factory()->count($childTodoCount)->incomplete()->for($group)->create([
@@ -445,19 +445,19 @@ class TodoControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create();
 
         // Create parent todo
-        $parentTodo = Todo::factory()->for($group)->create([
+        $parentTodo = Todo::factory()->for($group)->incomplete()->create([
             'title' => 'Parent Todo',
             'description' => 'Parent description',
         ]);
 
         // Create child todos
-        $childTodo1 = Todo::factory()->for($group)->create([
+        $childTodo1 = Todo::factory()->for($group)->incomplete()->create([
             'title' => 'Child Todo 1',
             'description' => 'Child description 1',
             'parent_id' => $parentTodo->id,
         ]);
 
-        $childTodo2 = Todo::factory()->for($group)->create([
+        $childTodo2 = Todo::factory()->for($group)->incomplete()->create([
             'title' => 'Child Todo 2',
             'description' => 'Child description 2',
             'parent_id' => $parentTodo->id,
