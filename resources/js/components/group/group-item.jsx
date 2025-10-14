@@ -24,7 +24,7 @@ import { preventNavigate } from '@/lib/utils';
 import { AlertDialogTrigger } from '@radix-ui/react-alert-dialog';
 
 
-const GroupItem = ({ item }) => {
+const GroupItem = ({ item, isActive }) => {
     const page = usePage();
     const [enableEditGroup, setEnableEditGroup] = useState(false)
     const deleteDialogTriggerRef = useRef()
@@ -40,7 +40,7 @@ const GroupItem = ({ item }) => {
     return (
         <>
             <SidebarMenuItem key={item.id}>
-                <SidebarMenuButton className='text-gray-400 group' asChild isActive={page.url.startsWith(item.id)} tooltip={{ children: item.name }}>
+                <SidebarMenuButton className={`text-gray-400 group ${isActive ? "bg-white text-black" : ""}`} asChild isActive={page.url.startsWith(item.id)} tooltip={{ children: item.name }}>
                     <Link href={route('group.todo', item.id)} className='flex justify-between hover:[&>svg]:block'>
                         <>
                             <span className='flex align-middle'>
