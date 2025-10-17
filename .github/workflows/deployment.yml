@@ -58,11 +58,17 @@ jobs:
       - name: Deploy containers
         run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans
 
+      - name: Enable maintenance mode
+        run: docker compose exec -T laravel.test php artisan down
+
       - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
 
       - name: Build frontend assets
         run: docker compose exec -T laravel.test npm run build
+
+      - name: Disable maintenance mode
+        run: docker compose exec -T laravel.test php artisan up
 
       - name: Cleanup old Docker resources
         if: always()
