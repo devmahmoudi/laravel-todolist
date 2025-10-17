@@ -72,12 +72,15 @@ jobs:
       - name: Start containers
         run: docker compose -f docker-compose.yml up -d --remove-orphans
 
-      - name: Run Migrations
+      - name: Enable maintenance mode
+        run: docker compose exec -T laravel.test php artisan down
+
+      - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
 
       - name: Clear caches (optional)
         run: docker compose exec -T laravel.test php artisan optimize:clear
 
-      - name: Cleanup
+      - name: Cleanup old Docker resources
         if: always()
         run: docker system prune -a -f --volumes
