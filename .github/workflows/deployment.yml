@@ -85,15 +85,15 @@ jobs:
             php artisan backup:run --only-db --disable-notifications
 
       - name: List backup files (debug)
-        run: docker compose exec -T laravel.test ls -lh storage/app/private/${{ env.APP_NAME }} || true
+        run: docker compose exec -T laravel.test ls -lh storage/app/private/todolist-backup || true
 
       - name: Locate latest backup file
         id: find_backup
         run: |
           LATEST=$(docker compose exec -T laravel.test sh -c \
-            "ls -t storage/app/private/${{ env.APP_NAME }}/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
+            "ls -t storage/app/private/todolist-backup/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
           if [ -z "$LATEST" ]; then
-            echo 'No backup ZIP found in storage/app/private/${{ env.APP_NAME }}/'
+            echo 'No backup ZIP found in storage/app/private/todolist-backup/'
             exit 1
           fi
           echo "Found backup: $LATEST"
