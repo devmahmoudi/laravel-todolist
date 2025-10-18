@@ -75,6 +75,24 @@ jobs:
       - name: Enable maintenance mode
         run: docker compose exec -T laravel.test php artisan down
 
+      - name: Run database backup (Spatie)
+        env:
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          docker compose exec -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
+            php artisan backup:run --only-db --disable-notifications
+
+      - name: Locate latest backup file
+        id: find_backup
+        run: |
+          LATEST=$(docker compose exec -T laravel.test sh -c 'ls -t storage/app/Laravel/Backups/*.zip | head -n 1')
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+
+      - name: Copy backup out of container
+        run: |
+          mkdir -p /tmp/laravel_backup
+          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
+
       - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
 
