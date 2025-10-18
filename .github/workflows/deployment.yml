@@ -39,6 +39,9 @@ jobs:
   Deploy:
     runs-on: production
     needs: Build-Image
+    env:
+      WWWGROUP: '1000'
+      BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
     steps:
       - uses: actions/checkout@v5
 
@@ -61,8 +64,37 @@ jobs:
       - name: Enable maintenance mode
         run: docker compose exec -T laravel.test php artisan down
 
+      - name: Run database backup (Spatie)
+        env:
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          docker compose exec -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
+            php artisan backup:run --only-db --disable-notifications
+
+      - name: Locate latest backup file
+        id: find_backup
+        run: |
+          LATEST=$(docker compose exec -T laravel.test sh -c 'ls -t storage/app/Laravel/Backups/*.zip | head -n 1')
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+
+      - name: Copy backup out of container
+        run: |
+          mkdir -p /tmp/laravel_backup
+          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
+
+      - name: Wipe database (empty all tables)
+        run: docker compose exec -T laravel.test php artisan db:wipe --force
+
       - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
+
+      - name: Restore database from backup
+        env:
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+        run: |
+          docker compose cp /tmp/laravel_backup/backup.zip laravel.test:/tmp/backup.zip
+          docker compose exec -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
+            php artisan backup:restore /tmp/backup.zip --password="${BACKUP_PASSWORD}"
 
       - name: Build frontend assets
         run: docker compose exec -T laravel.test npm run build
@@ -73,4 +105,3 @@ jobs:
       - name: Cleanup old Docker resources
         if: always()
         run: docker system prune -a -f --volumes
-
