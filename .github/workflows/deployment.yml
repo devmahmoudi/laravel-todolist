@@ -91,7 +91,7 @@ jobs:
         id: find_backup
         run: |
           LATEST=$(docker compose exec -T laravel.test sh -c \
-            "ls -t storage/app/private/todolist-backup/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
+            "ls -t /var/www/html/storage/app/private/todolist-backup/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
           if [ -z "$LATEST" ]; then
             echo 'No backup ZIP found in storage/app/private/todolist-backup/'
             exit 1
@@ -105,7 +105,7 @@ jobs:
       - name: Copy backup out of container
         run: |
           mkdir -p /tmp/laravel_backup
-          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
+          docker compose cp laravel.test:/var/www/html/${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
           ls -lh /tmp/laravel_backup
 
       - name: Run migrations
