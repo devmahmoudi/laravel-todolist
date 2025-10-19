@@ -105,7 +105,7 @@ jobs:
       - name: Copy backup out of container
         run: |
           mkdir -p /tmp/laravel_backup
-          docker compose cp laravel.test:/var/www/html/${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
+          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
           ls -lh /tmp/laravel_backup
 
       - name: Run migrations
