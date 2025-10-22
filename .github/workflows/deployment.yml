@@ -84,9 +84,6 @@ jobs:
           docker compose exec -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
             php artisan backup:run --only-db --disable-notifications
 
-      - name: List backup files (debug)
-        run: docker compose exec -T laravel.test ls -lh storage/app/private/todolist-backup || true
-
       - name: Locate latest backup file
         id: find_backup
         run: |
