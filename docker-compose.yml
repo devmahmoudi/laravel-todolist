@@ -18,14 +18,14 @@ services:
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
 
     scheduler:
-      build:
-        context: .
-        dockerfile: ./docker/scheduler/Dockerfile
-      volumes:
-        - .:/var/www/html
-      networks:
-        - sail
-      command: php artisan schedule:work
+        build:
+            context: .
+            dockerfile: ./docker/scheduler/Dockerfile
+        volumes:
+            - .:/var/www/html
+        networks:
+            - sail
+        command: php artisan schedule:work
         
     mysql:
         image: 'mysql/mysql-server:8.0'
