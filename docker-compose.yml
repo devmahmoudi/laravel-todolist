@@ -23,6 +23,8 @@ services:
         dockerfile: ./docker/scheduler/Dockerfile
       volumes:
         - .:/var/www/html
+      networks:
+        - sail
       command: php artisan schedule:work
         
     mysql:
