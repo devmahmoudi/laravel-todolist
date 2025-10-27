@@ -18,11 +18,13 @@ RUN docker-php-ext-install pdo pdo_mysql mbstring zip intl
 # Install Composer
 RUN curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/ --filename=composer
 
-# Copy application files
-COPY . .
+COPY composer.json composer.lock ./
 
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
+
+# Copy application files
+COPY . .
 
 # Optional: Set permissions for Laravel storage and cache
 RUN chown -R www-data:www-data storage bootstrap/cache
