@@ -21,7 +21,7 @@ RUN curl -sLS https://getcomposer.org/installer | php -- --install-dir=/usr/bin/
 COPY composer.json composer.lock ./
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install -n --prefer-dist --no-scripts
 
 # Copy application files
 COPY . .
