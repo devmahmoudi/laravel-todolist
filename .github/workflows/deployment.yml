@@ -74,8 +74,8 @@ jobs:
       - name: Start containers
         run: docker compose -f docker-compose.yml up -d --remove-orphans
 
-      - name: Sleep for mysql
-        run: sleep 15
+      - name: Wait for Mysql
+        run: ./docker/mysql/wait.sh mysql 3306
         
       - name: Run database backup (Spatie)
         env:
