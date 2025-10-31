@@ -59,8 +59,16 @@ RUN --mount=type=cache,target=/root/.composer/cache \
 # npm install + build with cache mount
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/root/.npm/_cacache \
-    npm ci --omit=dev --no-audit --no-fund && \
-    npm run build  # Pre-build Vite/Mix assets
+    npm ci --omit=dev --no-audit --no-fund
+
+# Copy Vite config + source (only what build needs)
+COPY vite.config.ts ./
+COPY resources ./resources
+COPY public ./public
+COPY tsconfig.json ./
+
+# Build (only runs if source or config changes)
+RUN npm run build
 
 # === Copy Application Code (Only this layer changes on code push) ===
 COPY . .
