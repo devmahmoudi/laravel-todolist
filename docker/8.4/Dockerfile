@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM ubuntu:24.04
 
-LABEL maintainer="Taylor Otwell"
+LABEL maintainer="Mahdi Mahmoudi"
 
 ARG WWWGROUP
 ARG NODE_VERSION=22
