@@ -2,7 +2,7 @@ name: Deploy Laravel
 
 on:
   push:
-    branches: [master]
+    # branches: [master]
   workflow_dispatch:
 
 env:
@@ -51,11 +51,18 @@ jobs:
           cp .env.example .env
           sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env
 
+      - name: Create sail user and set ownership
+        run: |
+          # Create sail group and user with UID/GID 1337
+          groupadd -g 1337 sail || true
+          useradd -u 1337 -g 1337 -m -s /bin/bash sail || true
+          # Change ownership of project files to sail:sail (1337:1337)
+          chown -R 1337:1337 .
+          
       - name: Fix permissions
         run: |
-          chown -R 0:${{ env.WWWGROUP }} storage bootstrap/cache
-          chmod -R 775 storage bootstrap/cache
-
+          chmod -R 775 bootstrap/cache
+          
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
 
