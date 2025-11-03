@@ -63,7 +63,9 @@ jobs:
           
       - name: Fix permissions
         run: |
-          chmod -R 775 bootstrap/cache
+          chmod -R 775 bootstrap/
+          chmod +x ./docker/mysql/wait.sh
+          ls -l ./docker/mysql/wait.sh  # Debug: Verify permissions
           
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
