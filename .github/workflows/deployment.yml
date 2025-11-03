@@ -53,6 +53,12 @@ jobs:
           cp .env.example .env
           sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env
 
+      - name: Fix permissions
+        run: |
+          chmod -R 775 bootstrap/
+          chmod +x ./docker/mysql/wait.sh
+          ls -l ./docker/mysql/wait.sh  # Debug: Verify permissions
+          
       - name: Create sail user and set ownership
         run: |
           # Create sail group and user with UID/GID 1337
@@ -61,11 +67,6 @@ jobs:
           # Change ownership of project files to sail:sail (1337:1337)
           chown -R 1337:1337 .
           
-      - name: Fix permissions
-        run: |
-          chmod -R 775 bootstrap/
-          chmod +x ./docker/mysql/wait.sh
-          ls -l ./docker/mysql/wait.sh  # Debug: Verify permissions
           
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
