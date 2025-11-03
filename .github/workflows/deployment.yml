@@ -76,8 +76,9 @@ jobs:
       - name: Start containers
         run: docker compose -f docker-compose.yml up -d --remove-orphans
 
-      - name: Wait for Mysql
-        run: ./docker/mysql/wait.sh mysql 3306
+      - name: Wait for MySQL
+        run: |
+          docker compose exec -T laravel.test bash -c "./docker/mysql/wait.sh 60"
         
       - name: Run database backup (Spatie)
         env:
