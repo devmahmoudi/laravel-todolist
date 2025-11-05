@@ -77,37 +77,37 @@ jobs:
       - name: Start containers
         run: docker compose -f docker-compose.yml up -d --remove-orphans
 
-      - name: Wait for MySQL
-        run: |
-          docker compose exec -T laravel.test bash -c "./docker/mysql/wait.sh 60"
+      # - name: Wait for MySQL
+      #   run: |
+      #     docker compose exec -T laravel.test bash -c "./docker/mysql/wait.sh 60"
         
-      - name: Run database backup (Spatie)
-        env:
-          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
-        run: |
-          docker compose exec -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
-          php artisan backup:run --only-db --disable-notifications
+      # - name: Run database backup (Spatie)
+      #   env:
+      #     BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+      #   run: |
+      #     docker compose exec -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
+      #     php artisan backup:run --only-db --disable-notifications
         
-      - name: Locate latest backup file
-        id: find_backup
-        run: |
-          LATEST=$(docker compose exec -T laravel.test sh -c \
-            "ls -t /var/www/html/storage/app/private/todolist-backup/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
-          if [ -z "$LATEST" ]; then
-            echo 'No backup ZIP found in storage/app/private/todolist-backup/'
-            exit 1
-          fi
-          echo "Found backup: $LATEST"
-          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+      # - name: Locate latest backup file
+      #   id: find_backup
+      #   run: |
+      #     LATEST=$(docker compose exec -T laravel.test sh -c \
+      #       "ls -t /var/www/html/storage/app/private/todolist-backup/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
+      #     if [ -z "$LATEST" ]; then
+      #       echo 'No backup ZIP found in storage/app/private/todolist-backup/'
+      #       exit 1
+      #     fi
+      #     echo "Found backup: $LATEST"
+      #     echo "latest=$LATEST" >> $GITHUB_OUTPUT
           
-          - name: Verify backup file exists inside container
-          run: docker compose exec -T laravel.test sh -c "test -f '${{ steps.find_backup.outputs.latest }}' && echo 'Backup verified.' || (echo 'Backup not found!' && exit 1)"
+      #     - name: Verify backup file exists inside container
+      #     run: docker compose exec -T laravel.test sh -c "test -f '${{ steps.find_backup.outputs.latest }}' && echo 'Backup verified.' || (echo 'Backup not found!' && exit 1)"
           
-      - name: Copy backup out of container
-        run: |
-          mkdir -p /tmp/laravel_backup
-          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
-          ls -lh /tmp/laravel_backup
+      # - name: Copy backup out of container
+      #   run: |
+      #     mkdir -p /tmp/laravel_backup
+      #     docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
+      #     ls -lh /tmp/laravel_backup
           
       - name: Enable maintenance mode
         run: docker compose exec -T laravel.test php artisan down
