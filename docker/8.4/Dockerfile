@@ -76,10 +76,7 @@ RUN npm run build
 COPY . .
 
 # Final Composer setup
-RUN composer dump-autoload --optimize && \
-    php artisan config:cache && \
-    php artisan route:cache && \
-    php artisan view:cache
+RUN composer dump-autoload --optimize
 
 # === Permissions & User Setup ===
 RUN userdel -r ubuntu 2>/dev/null || true
