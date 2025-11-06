@@ -78,9 +78,6 @@ jobs:
       - name: Start containers
         run: docker compose -f docker-compose.yml up -d --remove-orphans
 
-      - name: Laravel optimization
-        run: docker compose exec -T laravel.test php artisan optimize
-
       - name: Wait for MySQL
         run: |
           docker compose exec -T laravel.test bash -c "./docker/mysql/wait.sh 60"
@@ -126,8 +123,8 @@ jobs:
       - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
 
-      - name: Clear caches (optional)
-        run: docker compose exec -T laravel.test php artisan optimize:clear
+      - name: Laravel optimization
+        run: docker compose exec -T laravel.test php artisan optimize
 
       - name: Cleanup old Docker resources
         if: always()
