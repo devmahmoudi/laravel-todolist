@@ -102,10 +102,14 @@ jobs:
             exit 1
           fi
           echo "Found backup: $LATEST"
-          echo "latest=$LATEST" >> $GITHUB_OUTPUT
-          
-          - name: Verify backup file exists inside container
-          run: docker compose exec -T laravel.test sh -c "test -f '${{ steps.find_backup.outputs.latest }}' && echo 'Backup verified.' || (echo 'Backup not found!' && exit 1)"
+          if [ -z "$GITHUB_OUTPUT" ]; then
+            echo "Error: GITHUB_OUTPUT is not set"
+            exit 1
+          fi
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+        
+      - name: Verify backup file exists inside container
+        run: docker compose exec -T laravel.test sh -c "test -f '${{ steps.find_backup.outputs.latest }}' && echo 'Backup verified.' || (echo 'Backup not found!' && exit 1)"
           
       - name: Copy backup out of container
         run: |
