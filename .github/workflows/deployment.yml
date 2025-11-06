@@ -88,9 +88,12 @@ jobs:
       - name: Run database backup (Spatie)
         env:
           BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+          WWWUSER: 1337
+          SUPERVISOR_PHP_USER: sail
+          MYSQL_EXTRA_OPTIONS: ""
         run: |
-          docker compose exec -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
-          php artisan backup:run --only-db --disable-notifications
+          docker compose exec -u sail -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
+            php artisan backup:run --only-db --disable-notifications
         
       - name: Locate latest backup file
         id: find_backup
