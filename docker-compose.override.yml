@@ -11,3 +11,11 @@ services:
       - .:/var/www/html
     extra_hosts:
       - 'host.docker.internal:host-gateway'
+
+    scheduler:
+      build:
+          context: .
+          dockerfile: ./docker/scheduler/Dockerfile
+      image: devmahmoudi/laravel-todolist-schedule
+      volumes:
+          - .:/var/www/html
