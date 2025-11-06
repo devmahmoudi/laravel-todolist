@@ -17,15 +17,15 @@ services:
             XDEBUG_CONFIG: '${SAIL_XDEBUG_CONFIG:-client_host=host.docker.internal}'
             IGNITION_LOCAL_SITES_PATH: '${PWD}'
 
-    scheduler:
-        build:
-            context: .
-            dockerfile: ./docker/scheduler/Dockerfile
-        volumes:
-            - .:/var/www/html
-        networks:
-            - sail
-        command: php artisan schedule:work
+    # scheduler:
+    #     build:
+    #         context: .
+    #         dockerfile: ./docker/scheduler/Dockerfile
+    #     volumes:
+    #         - .:/var/www/html
+    #     networks:
+    #         - sail
+    #     command: php artisan schedule:work
         
     mysql:
         image: 'mysql/mysql-server:8.0'
