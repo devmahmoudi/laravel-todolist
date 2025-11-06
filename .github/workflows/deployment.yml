@@ -9,6 +9,7 @@ on:
 
 env:
   WWWGROUP: 1000
+  WWWUSER: sail
   IMAGE_NAME: devmahmoudi/laravel-todolist:latest
 
 jobs:
