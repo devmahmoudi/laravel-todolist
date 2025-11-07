@@ -16,19 +16,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx  # Add driver for GHA cache support
         uses: docker/setup-buildx-action@v3
-
+        with:
+          driver: docker-container  # Required for GHA cache backend
       - name: Build and push devmahmoudi/laravel-todolist:latest
         uses: docker/build-push-action@v6
         with:
@@ -38,22 +36,21 @@ jobs:
           tags: devmahmoudi/laravel-todolist:latest
           build-args: |
             WWWGROUP=${{ env.WWWGROUP }}
-          # Critical: Enable layer caching
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
+          # Scoped caching: Unique per image
+          cache-from: type=gha,scope=laravel-todolist
+          cache-to: type=gha,mode=max,scope=laravel-todolist
       - name: Build and push devmahmoudi/laravel-todolist-schedule
         uses: docker/build-push-action@v6
         with:
           context: .
           file: docker/scheduler/Dockerfile
           push: true
-          tags: devmahmoudi/laravel-todolist-schedule
+          tags: devmahmoudi/laravel-todolist-schedule  # No :latest tag here
           build-args: |
             WWWGROUP=${{ env.WWWGROUP }}
-          # Critical: Enable layer caching
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Scoped caching: Unique per image
+          cache-from: type=gha,scope=laravel-todolist-schedule
+          cache-to: type=gha,mode=max,scope=laravel-todolist-schedule
 
   deploy:
     needs: build
@@ -84,11 +81,11 @@ jobs:
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
 
-      - name: Pull latest image
-        run: docker compose -f docker-compose.yml pull laravel.test
+      - name: Pull latest images  # Pull all services, not just laravel.test
+        run: docker compose -f docker-compose.yml pull
 
-      - name: Start containers
-        run: docker compose -f docker-compose.yml up -d --remove-orphans
+      - name: Start containers  # Force pull and recreate if changed
+        run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans --force-recreate
 
       - name: Wait for MySQL
         run: |
@@ -138,6 +135,9 @@ jobs:
       - name: Laravel optimization
         run: docker compose exec -T laravel.test php artisan optimize
 
-      - name: Cleanup old Docker resources
-        if: always()
-        run: docker system prune -a -f --volumes
+      - name: Cleanup old Docker resources  # Run always, even on success
+        run: |
+          docker system prune -a -f --volumes
+          docker image prune -a -f  # Extra: Prune dangling images
+          docker volume prune -f    # Prune unused volumes
+          df -h /  # Debug: Show disk usage
