@@ -2,43 +2,55 @@ name: Deploy Laravel
 
 on:
   push:
-    branches: [master]
+    branches:
+      - master
+
   workflow_dispatch:
 
 env:
   WWWGROUP: 1000
-  IMAGE_NAME: devmahmoudi/laravel-todolist:latest
+  WWWUSER: sail
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ vars.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-
-      - name: Set up Docker Buildx
+      - name: Set up Docker Buildx  # Add driver for GHA cache support
         uses: docker/setup-buildx-action@v3
-
-      - name: Build and push
+        with:
+          driver: docker-container  # Required for GHA cache backend
+      - name: Build and push devmahmoudi/laravel-todolist:latest
         uses: docker/build-push-action@v6
         with:
           context: .
           file: docker/8.4/Dockerfile
           push: true
-          tags: ${{ env.IMAGE_NAME }}
+          tags: devmahmoudi/laravel-todolist:latest
           build-args: |
             WWWGROUP=${{ env.WWWGROUP }}
-          # Critical: Enable layer caching
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # Scoped caching: Unique per image
+          cache-from: type=gha,scope=laravel-todolist
+          cache-to: type=gha,mode=max,scope=laravel-todolist
+      - name: Build and push devmahmoudi/laravel-todolist-schedule
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/scheduler/Dockerfile
+          push: true
+          tags: devmahmoudi/laravel-todolist-schedule  # No :latest tag here
+          build-args: |
+            WWWGROUP=${{ env.WWWGROUP }}
+          # Scoped caching: Unique per image
+          cache-from: type=gha,scope=laravel-todolist-schedule
+          cache-to: type=gha,mode=max,scope=laravel-todolist-schedule
 
   deploy:
     needs: build
@@ -51,6 +63,12 @@ jobs:
           cp .env.example .env
           sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env
 
+      - name: Fix permissions
+        run: |
+          chmod -R 775 bootstrap/
+          chmod +x ./docker/mysql/wait.sh
+          ls -l ./docker/mysql/wait.sh  # Debug: Verify permissions
+          
       - name: Create sail user and set ownership
         run: |
           # Create sail group and user with UID/GID 1337
@@ -59,25 +77,67 @@ jobs:
           # Change ownership of project files to sail:sail (1337:1337)
           chown -R 1337:1337 .
           
-      - name: Fix permissions
-        run: |
-          chmod -R 775 bootstrap/cache
           
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
 
-      - name: Pull latest image
-        run: docker compose -f docker-compose.yml pull laravel.test
+      - name: Pull latest images  # Pull all services, not just laravel.test
+        run: docker compose -f docker-compose.yml pull
 
-      - name: Start containers
-        run: docker compose -f docker-compose.yml up -d --remove-orphans
+      - name: Start containers  # Force pull and recreate if changed
+        run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans --force-recreate
 
-      - name: Run Migrations
+      - name: Wait for MySQL
+        run: |
+          docker compose exec -T laravel.test bash -c "./docker/mysql/wait.sh 60"
+        
+      - name: Run database backup (Spatie)
+        env:
+          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+          WWWUSER: 1337
+          SUPERVISOR_PHP_USER: sail
+          MYSQL_EXTRA_OPTIONS: ""
+        run: |
+          docker compose exec -u sail -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
+            php artisan backup:run --only-db --disable-notifications
+        
+      - name: Locate latest backup file
+        id: find_backup
+        run: |
+          LATEST=$(docker compose exec -T laravel.test sh -c \
+            "ls -t /var/www/html/storage/app/private/todolist-backup/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
+          if [ -z "$LATEST" ]; then
+            echo 'No backup ZIP found in storage/app/private/todolist-backup/'
+            exit 1
+          fi
+          echo "Found backup: $LATEST"
+          if [ -z "$GITHUB_OUTPUT" ]; then
+            echo "Error: GITHUB_OUTPUT is not set"
+            exit 1
+          fi
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+        
+      - name: Verify backup file exists inside container
+        run: docker compose exec -T laravel.test sh -c "test -f '${{ steps.find_backup.outputs.latest }}' && echo 'Backup verified.' || (echo 'Backup not found!' && exit 1)"
+          
+      - name: Copy backup out of container
+        run: |
+          mkdir -p /tmp/laravel_backup
+          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
+          ls -lh /tmp/laravel_backup
+          
+      - name: Enable maintenance mode
+        run: docker compose exec -T laravel.test php artisan down
+
+      - name: Run migrations
         run: docker compose exec -T laravel.test php artisan migrate --force
 
-      - name: Clear caches (optional)
-        run: docker compose exec -T laravel.test php artisan optimize:clear
+      - name: Laravel optimization
+        run: docker compose exec -T laravel.test php artisan optimize
 
-      - name: Cleanup
-        if: always()
-        run: docker system prune -a -f --volumes
+      - name: Cleanup old Docker resources  # Run always, even on success
+        run: |
+          docker system prune -a -f --volumes
+          docker image prune -a -f  # Extra: Prune dangling images
+          docker volume prune -f    # Prune unused volumes
+          df -h /  # Debug: Show disk usage
