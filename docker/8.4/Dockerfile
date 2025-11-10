@@ -74,6 +74,7 @@ RUN npm run build
 
 # === Copy Application Code (Only this layer changes on code push) ===
 COPY . .
+COPY .env.example .env
 
 # Final Composer setup
 RUN composer dump-autoload --optimize
