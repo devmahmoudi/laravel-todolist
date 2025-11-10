@@ -84,10 +84,6 @@ COPY ./docker/8.4/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ./docker/8.4/php.ini /etc/php/8.4/cli/conf.d/99-sail.ini
 RUN chmod +x /usr/local/bin/start-container
 
-# Fix permissions
-RUN chown -R sail:$WWWGROUP storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
-
 EXPOSE 80/tcp
 
 ENTRYPOINT ["start-container"]
