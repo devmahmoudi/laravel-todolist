@@ -10,6 +10,11 @@ services:
     volumes:
       - laravel_storage:/var/www/html/storage
     environment:
+      APP_KEY: ${APP_KEY}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_USERNAME: ${DB_USERNAME}
       WWWUSER: '${WWWUSER}'
       LARAVEL_SAIL: 1
       XDEBUG_MODE: '${SAIL_XDEBUG_MODE:-off}'

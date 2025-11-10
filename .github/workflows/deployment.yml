@@ -58,11 +58,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Create .env
-        run: |
-          cp .env.example .env
-          sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env
-
       - name: Fix permissions
         run: |
           chmod -R 775 bootstrap/
@@ -85,6 +80,9 @@ jobs:
         run: docker compose -f docker-compose.yml pull
 
       - name: Start containers  # Force pull and recreate if changed
+        env:
+          APP_KEY: ${{ secrets.APP_KEY }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans --force-recreate
 
       - name: Wait for MySQL
