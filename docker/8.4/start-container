@@ -5,6 +5,9 @@ if [ "$SUPERVISOR_PHP_USER" != "root" ] && [ "$SUPERVISOR_PHP_USER" != "sail" ];
     exit 1
 fi
 
+echo "SUPERVISOR_PHP_USER: $SUPERVISOR_PHP_USER"
+echo "WWWUSER: $WWWUSER"
+
 
 # Ensure 'sail' user exists before attempting to change its UID
 if ! id -u sail >/dev/null 2>&1; then
