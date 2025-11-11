@@ -23,10 +23,10 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx  # Add driver for GHA cache support
+      - name: Set up Docker Buildx # Add driver for GHA cache support
         uses: docker/setup-buildx-action@v3
         with:
-          driver: docker-container  # Required for GHA cache backend
+          driver: docker-container # Required for GHA cache backend
       - name: Build and push devmahmoudi/laravel-todolist:latest
         uses: docker/build-push-action@v6
         with:
@@ -45,7 +45,7 @@ jobs:
           context: .
           file: docker/scheduler/Dockerfile
           push: true
-          tags: devmahmoudi/laravel-todolist-schedule  # No :latest tag here
+          tags: devmahmoudi/laravel-todolist-schedule # No :latest tag here
           build-args: |
             WWWGROUP=${{ env.WWWGROUP }}
           # Scoped caching: Unique per image
@@ -55,6 +55,13 @@ jobs:
   deploy:
     needs: build
     runs-on: production
+    env:
+      WWWUSER: 1337
+      APP_KEY: ${{ secrets.APP_KEY }}
+      DB_DATABASE: ${{ vars.DB_DATABASE }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
@@ -63,7 +70,7 @@ jobs:
           chmod -R 775 bootstrap/
           chmod +x ./docker/mysql/wait.sh
           ls -l ./docker/mysql/wait.sh  # Debug: Verify permissions
-          
+
       - name: Create sail user and set ownership
         run: |
           # Create sail group and user with UID/GID 1337
@@ -71,34 +78,25 @@ jobs:
           useradd -u 1337 -g 1337 -m -s /bin/bash sail || true
           # Change ownership of project files to sail:sail (1337:1337)
           chown -R 1337:1337 .
-          
-          
+
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
 
-      - name: Pull latest images  # Pull all services, not just laravel.test
+      - name: Pull latest images # Pull all services, not just laravel.test
         run: docker compose -f docker-compose.yml pull
 
-      - name: Start containers  # Force pull and recreate if changed
-        env:
-          APP_KEY: ${{ secrets.APP_KEY }}
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      - name: Start containers # Force pull and recreate if changed
         run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans --force-recreate
 
       - name: Wait for MySQL
         run: |
           docker compose exec -T laravel.test bash -c "./docker/mysql/wait.sh 60"
-        
+
       - name: Run database backup (Spatie)
-        env:
-          BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
-          WWWUSER: 1337
-          SUPERVISOR_PHP_USER: sail
-          MYSQL_EXTRA_OPTIONS: ""
         run: |
-          docker compose exec -u sail -e BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }} -T laravel.test \
+          docker compose exec -u sail -T laravel.test \
             php artisan backup:run --only-db --disable-notifications
-        
+
       - name: Locate latest backup file
         id: find_backup
         run: |
@@ -114,16 +112,16 @@ jobs:
             exit 1
           fi
           echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
-        
+
       - name: Verify backup file exists inside container
         run: docker compose exec -T laravel.test sh -c "test -f '${{ steps.find_backup.outputs.latest }}' && echo 'Backup verified.' || (echo 'Backup not found!' && exit 1)"
-          
+
       - name: Copy backup out of container
         run: |
           mkdir -p /tmp/laravel_backup
           docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
           ls -lh /tmp/laravel_backup
-          
+
       - name: Enable maintenance mode
         run: docker compose exec -T laravel.test php artisan down
 
@@ -133,7 +131,7 @@ jobs:
       - name: Laravel optimization
         run: docker compose exec -T laravel.test php artisan optimize
 
-      - name: Cleanup old Docker resources  # Run always, even on success
+      - name: Cleanup old Docker resources # Run always, even on success
         run: |
           docker system prune -a -f --volumes
           docker image prune -a -f  # Extra: Prune dangling images
