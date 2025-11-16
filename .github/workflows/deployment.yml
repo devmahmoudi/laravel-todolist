@@ -80,9 +80,10 @@ jobs:
 
       - name: Change storage directory and .env file ownership to sail
         run: |
-          docker compose exec -T laravel.test \
-            chown -R 1337:1337 storage/ \
-            chown -R 1337:1337 .env \
+          docker compose exec -T laravel.test bash -c "
+            chown -R 1337:1337 storage &&
+            chown 1337:1337 .env
+          "
 
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
