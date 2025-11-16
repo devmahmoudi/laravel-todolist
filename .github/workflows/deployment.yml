@@ -60,7 +60,7 @@ jobs:
 
       - name: Create .env
         run: |
-          docker compose exec -T laravel.test bash -c "
+          docker compose --env-file /dev/null exec -T laravel.test bash -c "
             cp .env.example .env &&
             sed -i 's|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|' .env &&
             sed -i 's|^DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|' .env &&
@@ -68,14 +68,14 @@ jobs:
             sed -i 's|^DB_USERNAME=.*|DB_USERNAME=${{ secrets.DB_USERNAME }}|' .env &&
             sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|' .env &&
             sed -i 's|^BACKUP_PASSWORD=.*|BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }}|' .env
-          "    
+          "
 
-          - name: Change storage directory and .env file ownership to sail
-            run: |
-              docker compose exec -T laravel.test bash -c "
-                chown -R 1337:1337 storage &&
-                chown 1337:1337 .env
-              "
+      - name: Change storage directory and .env file ownership to sail
+        run: |
+          docker compose exec -T laravel.test bash -c "
+            chown -R 1337:1337 storage &&
+            chown 1337:1337 .env
+          "
 
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
