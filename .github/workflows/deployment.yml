@@ -56,7 +56,7 @@ jobs:
     needs: build
     runs-on: production
     env:
-      WWWUSER: 1337
+      # WWWUSER: 1337
       APP_KEY: ${{ secrets.APP_KEY }}
       DB_HOST: ${{ vars.DB_HOST }}
       DB_DATABASE: ${{ vars.DB_DATABASE }}
