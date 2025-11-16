@@ -55,27 +55,33 @@ jobs:
   deploy:
     needs: build
     runs-on: production
+    env:
+      WWWUSER: 1337
+      APP_KEY: ${{ secrets.APP_KEY }}
+      DB_HOST: ${{ vars.DB_HOST }}
+      DB_DATABASE: ${{ vars.DB_DATABASE }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
     steps:
       - uses: actions/checkout@v4
 
       - name: Create .env
         run: |
-          docker compose --env-file /dev/null exec -T laravel.test bash -c "
-            cp .env.example .env &&
-            sed -i 's|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|' .env &&
-            sed -i 's|^DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|' .env &&
-            sed -i 's|^DB_DATABASE=.*|DB_DATABASE=${{ secrets.DB_DATABASE }}|' .env &&
-            sed -i 's|^DB_USERNAME=.*|DB_USERNAME=${{ secrets.DB_USERNAME }}|' .env &&
-            sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|' .env &&
-            sed -i 's|^BACKUP_PASSWORD=.*|BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }}|' .env
-          "
+          docker compose exec -T laravel.test \ 
+          cp .env.example .env && \
+          sed -i "s|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|" .env &&
+          sed -i "s|^DB_HOST=.*|DB_HOST=${{ secrets.DB_HOST }}|" .env
+          sed -i "s|^DB_DATABASE=.*|DB_DATABASE=${{ secrets.DB_DATABASE }}|" .env
+          sed -i "s|^DB_USERNAME=.*|DB_USERNAME=${{ secrets.DB_USERNAME }}|" .env
+          sed -i "s|^DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|" .env
+          sed -i "s|^BACKUP_PASSWORD=.*|BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }}|" .env
 
       - name: Change storage directory and .env file ownership to sail
         run: |
-          docker compose exec -T laravel.test bash -c "
-            chown -R 1337:1337 storage &&
-            chown 1337:1337 .env
-          "
+          docker compose exec -T laravel.test \
+            chown -R 1337:1337 storage/ \
+            chown -R 1337:1337 .env \
 
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
