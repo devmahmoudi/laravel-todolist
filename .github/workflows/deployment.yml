@@ -72,14 +72,6 @@ jobs:
           chmod +x ./docker/mysql/wait.sh
           ls -l ./docker/mysql/wait.sh  # Debug: Verify permissions
 
-      - name: Create sail user and set ownership
-        run: |
-          # Create sail group and user with UID/GID 1337
-          groupadd -g 1337 sail || true
-          useradd -u 1337 -g 1337 -m -s /bin/bash sail || true
-          # Change ownership of project files to sail:sail (1337:1337)
-          chown -R 1337:1337 .
-
       - name: Stop old containers
         run: docker compose down --remove-orphans || true
 
