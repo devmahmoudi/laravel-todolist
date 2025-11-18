@@ -12,7 +12,7 @@ services:
     environment:
       APP_KEY: ${APP_KEY}
       DB_PASSWORD: ${DB_PASSWORD}
-      DB_HOST: ${DB_HOST}
+      DB_HOST: mysql
       DB_DATABASE: ${DB_DATABASE}
       DB_USERNAME: ${DB_USERNAME}
       WWWUSER: '${WWWUSER}'
