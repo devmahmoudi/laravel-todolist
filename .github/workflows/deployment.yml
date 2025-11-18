@@ -66,6 +66,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Stop old containers
+        run: docker compose down --remove-orphans || true
+
+      - name: Pull latest images # Pull all services, not just laravel.test
+        run: docker compose -f docker-compose.yml pull
+
+      - name: Start containers # Force pull and recreate if changed
+        run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans --force-recreate
+
       - name: Create .env
         run: |
           docker compose --env-file /dev/null exec -T laravel.test bash -c "
@@ -84,15 +93,6 @@ jobs:
             chown -R 1337:1337 storage &&
             chown 1337:1337 .env
           "
-
-      - name: Stop old containers
-        run: docker compose down --remove-orphans || true
-
-      - name: Pull latest images # Pull all services, not just laravel.test
-        run: docker compose -f docker-compose.yml pull
-
-      - name: Start containers # Force pull and recreate if changed
-        run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans --force-recreate
 
       - name: Wait for MySQL
         run: |
