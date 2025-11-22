@@ -121,9 +121,9 @@ jobs:
 
       - name: Copy backup out of container
         run: |
-          mkdir -p /tmp/laravel_backup
-          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} /tmp/laravel_backup/backup.zip
-          ls -lh /tmp/laravel_backup
+          mkdir -p ~/laravel_backup
+          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} ~/laravel_backup/backup.zip
+          ls -lh ~/laravel_backup
 
       - name: Enable maintenance mode
         run: docker compose exec -T laravel.test php artisan down
