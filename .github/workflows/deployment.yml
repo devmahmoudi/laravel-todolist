@@ -134,6 +134,9 @@ jobs:
       - name: Laravel optimization
         run: docker compose exec -T laravel.test php artisan optimize
 
+      - name: Disable maintenance mode
+        run: docker compose exec -T laravel.test php artisan up
+
       - name: Cleanup old Docker resources # Run always, even on success
         run: |
           docker system prune -a -f --volumes
