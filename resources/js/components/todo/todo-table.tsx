@@ -30,13 +30,10 @@ const TodoTable = ({ todos, groupId, parentId }: TodoTableProps) => {
         const url = new URL(window.location.href);
         const params = url.searchParams;
 
-        if(includeIncomplete)
-            params.set('completed', '1');
-        else
-            params.delete('completed');
+        if (includeIncomplete) params.set('completed', '1');
+        else params.delete('completed');
 
-        if(window.location.href != url.toString())
-            router.visit(url.toString(), {preserveState: true})
+        if (window.location.href != url.toString()) router.visit(url.toString(), { preserveState: true });
     }, [includeIncomplete]);
 
     /**
@@ -108,8 +105,10 @@ const TodoTable = ({ todos, groupId, parentId }: TodoTableProps) => {
                                     checked={Boolean(item.completed_at)}
                                 />
                             </TableCell>
-                            <TableCell className="max-w-[200px] cursor-pointer truncate font-medium">
-                                <Link href={route('todo.show', item.id)}>{item.title}</Link>
+                            <TableCell className="max-w-[200px] cursor-pointer truncate font-medium text-blue-500 underline hover:scale-105 transition-all">
+                                <Link href={route('todo.show', item.id)}>
+                                    {item.title}
+                                </Link>
                             </TableCell>
                             <TableCell className="max-w-[400px] truncate">{item.description}</TableCell>
                             <TableCell>{dateFnsFormat(item.created_at, 'PPpp')}</TableCell>
