@@ -1,0 +1,106 @@
+name: Deploy Laravel
+
+on:
+  push:
+    branches:
+      - master
+
+  workflow_dispatch:
+
+env:
+  WWWGROUP: 1000
+  WWWUSER: 1337
+
+jobs:
+  deploy-production:
+    environment: Production
+    runs-on: production
+    env:
+      WWWUSER: 1337
+      APP_KEY: ${{ secrets.APP_KEY }}
+      DB_DATABASE: ${{ vars.DB_DATABASE }}
+      DB_USERNAME: ${{ secrets.DB_USERNAME }}
+      DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+      BACKUP_PASSWORD: ${{ secrets.BACKUP_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stop old containers
+        run: docker compose down --remove-orphans || true
+
+      - name: Pull latest images # Pull all services, not just laravel.test
+        run: docker compose -f docker-compose.yml pull
+
+      - name: Start containers # Force pull and recreate if changed
+        run: docker compose -f docker-compose.yml up -d --pull always --remove-orphans --force-recreate
+
+      - name: Create .env
+        run: |
+          docker compose --env-file /dev/null exec -T laravel.test bash -c "
+            cp .env.example .env &&
+            sed -i 's|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|' .env &&
+            sed -i 's|^DB_USERNAME=.*|DB_USERNAME=${{ secrets.DB_USERNAME }}|' .env &&
+            sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|' .env &&
+            sed -i 's|^APP_DEBUG=.*|APP_DEBUG=true|' .env &&
+            sed -i 's|^BACKUP_PASSWORD=.*|BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }}|' .env
+          "
+
+      - name: Change storage directory and .env file ownership to sail
+        run: |
+          docker compose exec -T laravel.test bash -c "
+            chown -R 1337:1337 storage &&
+            chown 1337:1337 .env
+          "
+
+      - name: Wait for MySQL
+        run: |
+          docker compose exec -T laravel.test bash -c "./docker/mysql/wait.sh 60"
+
+      - name: Run database backup (Spatie)
+        run: |
+          docker compose exec -u sail -T laravel.test \
+            php artisan backup:run --only-db --disable-notifications
+
+      - name: Locate latest backup file
+        id: find_backup
+        run: |
+          LATEST=$(docker compose exec -T laravel.test sh -c \
+            "ls -t /var/www/html/storage/app/private/todolist-backup/*.zip 2>/dev/null | head -n 1 | tr -d '\r'")
+          if [ -z "$LATEST" ]; then
+            echo 'No backup ZIP found in storage/app/private/todolist-backup/'
+            exit 1
+          fi
+          echo "Found backup: $LATEST"
+          if [ -z "$GITHUB_OUTPUT" ]; then
+            echo "Error: GITHUB_OUTPUT is not set"
+            exit 1
+          fi
+          echo "latest=$LATEST" >> "$GITHUB_OUTPUT"
+
+      - name: Verify backup file exists inside container
+        run: docker compose exec -T laravel.test sh -c "test -f '${{ steps.find_backup.outputs.latest }}' && echo 'Backup verified.' || (echo 'Backup not found!' && exit 1)"
+
+      - name: Copy backup out of container
+        run: |
+          mkdir -p ~/laravel_backup
+          docker compose cp laravel.test:${{ steps.find_backup.outputs.latest }} ~/laravel_backup/backup.zip
+          ls -lh ~/laravel_backup
+
+      - name: Enable maintenance mode
+        run: docker compose exec -T laravel.test php artisan down
+
+      - name: Run migrations
+        run: docker compose exec -T laravel.test php artisan migrate --force
+
+      - name: Laravel optimization
+        run: docker compose exec -T laravel.test php artisan optimize
+
+      - name: Disable maintenance mode
+        run: docker compose exec -T laravel.test php artisan up
+
+      - name: Cleanup old Docker resources # Run always, even on success
+        run: |
+          docker system prune -a -f --volumes
+          docker image prune -a -f  # Extra: Prune dangling images
+          docker volume prune -f    # Prune unused volumes
+          df -h /  # Debug: Show disk usage
