@@ -100,7 +100,6 @@ jobs:
 
       - name: Cleanup old Docker resources # Run always, even on success
         run: |
-          docker system prune -a -f --volumes
-          docker image prune -a -f  # Extra: Prune dangling images
-          docker volume prune -f    # Prune unused volumes
+          docker image prune -a -f
+          docker builder prune -f
           df -h /  # Debug: Show disk usage
