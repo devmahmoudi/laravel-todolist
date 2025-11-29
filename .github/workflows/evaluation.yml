@@ -1,5 +1,8 @@
 name: Run Laravel Unit Test
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - master
 
 jobs:
   test:
@@ -30,7 +33,7 @@ jobs:
         run: composer install -n --prefer-dist
 
       - name: Prepare Laravel application
-        run:  |
+        run: |
           cp .env.example .env
           php artisan key:generate
           touch database/database.sqlite
@@ -42,15 +45,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
- 
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.2'
           coverage: none
- 
+
       - name: Install composer dependencies
         run: composer install -n --prefer-dist
- 
+
       - name: Run Static Analysis
         run: ./vendor/bin/phpstan analyse  app tests config --error-format=github

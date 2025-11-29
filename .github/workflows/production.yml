@@ -1,62 +1,22 @@
-name: Deploy Laravel
+name: Deploy Production
 
-on:
+on: 
   push:
     branches:
       - master
-
   workflow_dispatch:
 
 env:
   WWWGROUP: 1000
   WWWUSER: 1337
 
-jobs:
-  build:
-    environment: Staging
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
-      - name: Set up Docker Buildx # Add driver for GHA cache support
-        uses: docker/setup-buildx-action@v3
-        with:
-          driver: docker-container # Required for GHA cache backend
-      - name: Build and push devmahmoudi/laravel-todolist:latest
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/8.4/Dockerfile
-          push: true
-          tags: devmahmoudi/laravel-todolist:latest
-          build-args: |
-            WWWGROUP=${{ env.WWWGROUP }}
-          # Scoped caching: Unique per image
-          cache-from: type=gha,scope=laravel-todolist
-          cache-to: type=gha,mode=max,scope=laravel-todolist
-      - name: Build and push devmahmoudi/laravel-todolist-schedule
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: docker/scheduler/Dockerfile
-          push: true
-          tags: devmahmoudi/laravel-todolist-schedule # No :latest tag here
-          build-args: |
-            WWWGROUP=${{ env.WWWGROUP }}
-          # Scoped caching: Unique per image
-          cache-from: type=gha,scope=laravel-todolist-schedule
-          cache-to: type=gha,mode=max,scope=laravel-todolist-schedule
+permissions:
+  contents: read # for checkout
 
-  deploy-staging:
-    environment: Staging
-    needs: build
-    runs-on: staging
+jobs:
+  deploy-production:
+    environment: Production
+    runs-on: production
     env:
       WWWUSER: 1337
       APP_KEY: ${{ secrets.APP_KEY }}
@@ -83,6 +43,7 @@ jobs:
             sed -i 's|^APP_KEY=.*|APP_KEY=${{ secrets.APP_KEY }}|' .env &&
             sed -i 's|^DB_USERNAME=.*|DB_USERNAME=${{ secrets.DB_USERNAME }}|' .env &&
             sed -i 's|^DB_PASSWORD=.*|DB_PASSWORD=${{ secrets.DB_PASSWORD }}|' .env &&
+            sed -i 's|^APP_DEBUG=.*|APP_DEBUG=true|' .env &&
             sed -i 's|^BACKUP_PASSWORD=.*|BACKUP_PASSWORD=${{ secrets.BACKUP_PASSWORD }}|' .env
           "
 
@@ -141,7 +102,37 @@ jobs:
 
       - name: Cleanup old Docker resources # Run always, even on success
         run: |
-          docker system prune -a -f --volumes
-          docker image prune -a -f  # Extra: Prune dangling images
-          docker volume prune -f    # Prune unused volumes
+          docker image prune -a -f
+          docker builder prune -f
           df -h /  # Debug: Show disk usage
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: deploy-production
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - run: npm ci
+
+      - name: Release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx -p semantic-release@25 \
+              -p @semantic-release/commit-analyzer \
+              -p @semantic-release/release-notes-generator \
+              -p @semantic-release/changelog \
+              -p @semantic-release/github \
+              -p @semantic-release/git \
+              semantic-release
