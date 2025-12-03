@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Todo;
-use Inertia\Inertia;
 use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -17,40 +16,50 @@ use function PHPUnit\Framework\isNull;
 class TodoController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource (API).
+     *
+     * @param \App\Models\Group $group
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Group $group)
     {
-        return Inertia::render('todo/todo-index', [
-            'group' => $group,
-            'todos' => $group->todos()->whereNull('parent_id')->with('children')->when(!request()->has('completed'), function ($builder) {
+        $todos = $group->todos()
+            ->whereNull('parent_id')
+            ->with('children')
+            ->when(!request()->has('completed'), function ($builder) {
                 $builder->incomplete();
-            })->get()
+            })
+            ->get();
+
+        return response()->json([
+            'group' => $group,
+            'data' => $todos,
         ]);
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
+     * Store a newly created resource in storage (API).
+     *
+     * @param \App\Http\Requests\StoreTodoRequest $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreTodoRequest $request)
     {
-        Todo::create(
+        $todo = Todo::create(
             $request->validated()
         );
 
-        return back()->with('toast.success', 'Todo created successfully.');
+        return response()->json([
+            'message' => 'Todo created successfully.',
+            'data' => $todo,
+        ], 201);
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource (API).
+     *
+     * @param \App\Models\Todo $todo
+     * @return \Illuminate\Http\JsonResponse
      */
     public function show(Todo $todo)
     {
@@ -58,40 +67,52 @@ class TodoController extends Controller
 
         $todo->load('group');
 
-        return Inertia::render('todo/todo-detail', [
-            'todo' => $todo,
-            'ancestors' => $todo->ancestors()
+        return response()->json([
+            'data' => $todo,
+            'ancestors' => $todo->ancestors(),
         ]);
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update the specified resource in storage (API).
+     *
+     * @param \App\Http\Requests\UpdateTodoRequest $request
+     * @param \App\Models\Todo $todo
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateTodoRequest $request, Todo $todo)
     {
         $todo->update($request->validated());
 
-        return back()->with('toast.success', 'Todo updated successfully.');
+        return response()->json([
+            'message' => 'Todo updated successfully.',
+            'data' => $todo->fresh(),
+        ]);
     }
 
     /**
-     * Remove the specified resource from storage.
+     * Remove the specified resource from storage (API).
+     *
+     * @param \App\Models\Todo $todo
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Todo $todo)
     {
         $todo->delete();
 
-        return back()->with('toast.success', 'Todo deleted successfully.');
+        return response()->json([
+            'message' => 'Todo deleted successfully.',
+        ]);
     }
 
     /**
-     * Toggles Todo completed_at field
+     * Toggles Todo completed_at field (API)
      * 
      * Sets now as todo's completed_at value if it
      * is null, otherwise sets null
      *
      * @param Todo $todo
-     * @return void
+     * @return \Illuminate\Http\JsonResponse
      */
     public function toggleCompleted(Todo $todo)
     {
@@ -100,6 +121,9 @@ class TodoController extends Controller
         else
             $todo->update(['completed_at' => null]);
 
-        return back()->with('toast.success', "Todo marked as " . ($isIncomplete ? "completed" : 'incomplete'));
+        return response()->json([
+            'message' => 'Todo marked as ' . ($isIncomplete ? 'completed' : 'incomplete'),
+            'data' => $todo->fresh(),
+        ]);
     }
 }
