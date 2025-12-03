@@ -4,14 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Todo;
 use App\Models\Group;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 use App\Http\Requests\StoreTodoRequest;
 use App\Http\Requests\UpdateTodoRequest;
-use App\Models\Scopes\IncompleteScope;
-use Illuminate\Contracts\Database\Query\Builder;
-
-use function PHPUnit\Framework\isNull;
 
 class TodoController extends Controller
 {
