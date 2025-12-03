@@ -9,6 +9,20 @@ use Illuminate\Support\Facades\Auth;
 class GroupController extends Controller
 {
     /**
+     * Display a listing of the authenticated user's groups (API).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $groups = Auth::user()->groups()->get();
+
+        return response()->json([
+            'data' => $groups,
+        ]);
+    }
+
+    /**
      * Create new Group (API)
      *
      * @param Request $request
@@ -26,6 +40,19 @@ class GroupController extends Controller
             'message' => 'New group has been created.',
             'data' => $group,
         ], 201);
+    }
+
+    /**
+     * Display the specified Group (API).
+     *
+     * @param \App\Models\Group $group
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Group $group)
+    {
+        return response()->json([
+            'data' => $group,
+        ]);
     }
 
     /**

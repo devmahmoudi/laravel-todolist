@@ -151,4 +151,43 @@ class GroupControllerTest extends TestCase
             'id' => $group->id,
         ]);
     }
-} 
+
+    public function test_index_returns_authenticated_users_groups()
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $userGroups = Group::factory()->count(3)->for($user, 'owner')->create();
+        Group::factory()->count(2)->for($otherUser, 'owner')->create();
+
+        $this->actingAs($user);
+
+        $response = $this->getJson('/group');
+
+        $response->assertOk();
+        $response->assertJsonCount(3, 'data');
+
+        foreach ($userGroups as $group) {
+            $response->assertJsonFragment([
+                'id' => $group->id,
+                'name' => $group->name,
+                'owner_id' => $user->id,
+            ]);
+        }
+    }
+
+    public function test_show_returns_group_data_for_owner()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+
+        $this->actingAs($user);
+
+        $response = $this->getJson('/group/' . $group->id);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $group->id);
+        $response->assertJsonPath('data.name', $group->name);
+        $response->assertJsonPath('data.owner_id', $user->id);
+    }
+}
