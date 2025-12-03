@@ -8,7 +8,6 @@ use App\Models\User;
 use Database\Factories\GroupFactory;
 use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
-use Inertia\Testing\AssertableInertia as Assert;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class TodoControllerTest extends TestCase
@@ -23,11 +22,13 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->get(route('group.todo', $group->id))
-            ->assertInertia(
-                fn(Assert $page) =>
-                $page->component('todo/todo-index')
-            );
+        $response = $this->getJson(route('group.todo', $group->id));
+
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'group',
+            'data',
+        ]);
     }
 
     public function test_pass_group_and_todo_list_to_todo_index_page()
@@ -49,21 +50,21 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->get(route('group.todo', $group->id))
-            ->assertInertia(
-                fn(Assert $page) =>
-                $page->component('todo/todo-index')
-                    ->has(
-                        'group',
-                        fn(Assert $page) =>
-                        $page->where('id', $group->id)
-                            ->where('name', $group->name)
-                            ->where('owner_id', $group->owner_id)
-                            ->etc()
-                    )
-                    ->has('todos', $topLevelTodoCount) // Only top-level todos
-                    ->has('todos.0.children')
-            );
+        $response = $this->getJson(route('group.todo', $group->id));
+
+        $response->assertOk();
+        $response->assertJsonPath('group.id', $group->id);
+        $response->assertJsonCount($topLevelTodoCount, 'data');
+        $response->assertJsonStructure([
+            'group',
+            'data' => [
+                [
+                    'id',
+                    'title',
+                    'children',
+                ],
+            ],
+        ]);
     }
 
     public function test_store_todo_creates_todo_and_redirects_with_success_message()
@@ -79,12 +80,14 @@ class TodoControllerTest extends TestCase
             'parent_id' => null,
         ];
 
-        $response = $this->post(route('todo.store'), $data);
+        $response = $this->postJson(route('todo.store'), $data);
 
         $this->assertDatabaseHas('todos', $data);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo created successfully.');
+        $response->assertCreated();
+        $response->assertJson([
+            'message' => 'Todo created successfully.',
+        ]);
     }
 
     public function test_destroy_todo_deletes_todo_and_redirects_with_success_message()
@@ -95,12 +98,14 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->delete(route('todo.delete', $todo->id));
+        $response = $this->deleteJson(route('todo.delete', $todo->id));
 
         $this->assertDatabaseMissing('todos', ['id' => $todo->id]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo deleted successfully.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo deleted successfully.',
+        ]);
     }
 
     public function test_update_todo_updates_todo_and_redirects_with_success_message()
@@ -119,7 +124,7 @@ class TodoControllerTest extends TestCase
             'description' => 'Updated description',
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
         $this->assertDatabaseHas('todos', [
             'id' => $todo->id,
@@ -127,8 +132,10 @@ class TodoControllerTest extends TestCase
             'description' => 'Updated description',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo updated successfully.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo updated successfully.',
+        ]);
     }
 
     public function test_update_todo_with_only_title()
@@ -146,7 +153,7 @@ class TodoControllerTest extends TestCase
             'title' => 'Updated Title Only',
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
         $this->assertDatabaseHas('todos', [
             'id' => $todo->id,
@@ -154,8 +161,10 @@ class TodoControllerTest extends TestCase
             'description' => 'Original description', // Should remain unchanged
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo updated successfully.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo updated successfully.',
+        ]);
     }
 
     public function test_update_todo_with_null_description()
@@ -182,8 +191,10 @@ class TodoControllerTest extends TestCase
             'description' => null,
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo updated successfully.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo updated successfully.',
+        ]);
     }
 
     public function test_update_todo_validation_requires_title()
@@ -295,12 +306,13 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(route('todo.show', $todo->id));
+        $response = $this->getJson(route('todo.show', $todo->id));
 
-        $response->assertInertia(
-            fn(Assert $page) =>
-            $page->component('todo/todo-detail')
-        );
+        $response->assertOk();
+        $response->assertJsonStructure([
+            'data',
+            'ancestors',
+        ]);
     }
 
     public function test_show_todo_passes_todo_data_to_page()
@@ -314,24 +326,20 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(route('todo.show', $todo->id));
+        $response = $this->getJson(route('todo.show', $todo->id));
 
-        $response->assertInertia(
-            fn(Assert $page) =>
-            $page->component('todo/todo-detail')
-                ->has(
-                    'todo',
-                    fn(Assert $page) =>
-                    $page->where('id', $todo->id)
-                        ->where('title', 'Test Todo Title')
-                        ->where('description', 'Test Todo Description')
-                        ->where('group_id', $group->id)
-                        ->has('group')
-                        ->has('children')
-                        ->etc()
-                )
-                ->has('ancestors')
-        );
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $todo->id);
+        $response->assertJsonPath('data.title', 'Test Todo Title');
+        $response->assertJsonPath('data.description', 'Test Todo Description');
+        $response->assertJsonPath('data.group_id', $group->id);
+        $response->assertJsonStructure([
+            'data' => [
+                'group',
+                'children',
+            ],
+            'ancestors',
+        ]);
     }
 
     public function test_show_todo_requires_authenticated_user()
@@ -365,22 +373,18 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(route('todo.show', $todo->id));
+        $response = $this->getJson(route('todo.show', $todo->id));
 
-        $response->assertInertia(
-            fn(Assert $page) =>
-            $page->component('todo/todo-detail')
-                ->has(
-                    'todo',
-                    fn(Assert $page) =>
-                    $page->where('id', $todo->id)
-                        ->where('title', 'Todo with no description')
-                        ->where('description', null)
-                        ->has('children')
-                        ->etc()
-                )
-                ->has('ancestors')
-        );
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $todo->id);
+        $response->assertJsonPath('data.title', 'Todo with no description');
+        $response->assertJsonPath('data.description', null);
+        $response->assertJsonStructure([
+            'data' => [
+                'children',
+            ],
+            'ancestors',
+        ]);
     }
 
     public function test_show_todo_includes_ancestors_data()
@@ -408,35 +412,16 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(route('todo.show', $child->id));
+        $response = $this->getJson(route('todo.show', $child->id));
 
-        $response->assertInertia(
-            fn(Assert $page) =>
-            $page->component('todo/todo-detail')
-                ->has(
-                    'todo',
-                    fn(Assert $page) =>
-                    $page->where('id', $child->id)
-                        ->where('title', 'Child Todo')
-                        ->has('children')
-                        ->etc()
-                )
-                ->has('ancestors', 2) // 2 ancestors: grandparent and parent
-                ->has(
-                    'ancestors.0',
-                    fn(Assert $page) =>
-                    $page->where('id', $grandparent->id)
-                        ->where('title', 'Grandparent Todo')
-                        ->etc()
-                )
-                ->has(
-                    'ancestors.1',
-                    fn(Assert $page) =>
-                    $page->where('id', $parent->id)
-                        ->where('title', 'Parent Todo')
-                        ->etc()
-                )
-        );
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $child->id);
+        $response->assertJsonPath('data.title', 'Child Todo');
+        $response->assertJsonCount(2, 'ancestors');
+        $response->assertJsonPath('ancestors.0.id', $grandparent->id);
+        $response->assertJsonPath('ancestors.0.title', 'Grandparent Todo');
+        $response->assertJsonPath('ancestors.1.id', $parent->id);
+        $response->assertJsonPath('ancestors.1.title', 'Parent Todo');
     }
 
     public function test_todo_index_includes_children_in_todos()
@@ -465,20 +450,13 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $this->get(route('group.todo', $group->id))
-            ->assertInertia(
-                fn(Assert $page) =>
-                $page->component('todo/todo-index')
-                    ->has('todos', 1) // Only the parent todo (top-level)
-                    ->has('todos.0.children', 2) // 2 children
-                    ->has(
-                        'todos.0',
-                        fn(Assert $page) =>
-                        $page->where('id', $parentTodo->id)
-                            ->where('title', 'Parent Todo')
-                            ->etc()
-                    )
-            );
+        $response = $this->getJson(route('group.todo', $group->id));
+
+        $response->assertOk();
+        $response->assertJsonCount(1, 'data');
+        $response->assertJsonCount(2, 'data.0.children');
+        $response->assertJsonPath('data.0.id', $parentTodo->id);
+        $response->assertJsonPath('data.0.title', 'Parent Todo');
     }
 
     public function test_show_todo_includes_children_data()
@@ -507,37 +485,19 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(route('todo.show', $parentTodo->id));
+        $response = $this->getJson(route('todo.show', $parentTodo->id));
 
-        $response->assertInertia(
-            fn(Assert $page) =>
-            $page->component('todo/todo-detail')
-                ->has(
-                    'todo',
-                    fn(Assert $page) =>
-                    $page->where('id', $parentTodo->id)
-                        ->where('title', 'Parent Todo')
-                        ->where('description', 'Parent description')
-                        ->has('children', 2)
-                        ->has(
-                            'children.0',
-                            fn(Assert $page) =>
-                            $page->where('id', $childTodo1->id)
-                                ->where('title', 'Child Todo 1')
-                                ->where('parent_id', $parentTodo->id)
-                                ->etc()
-                        )
-                        ->has(
-                            'children.1',
-                            fn(Assert $page) =>
-                            $page->where('id', $childTodo2->id)
-                                ->where('title', 'Child Todo 2')
-                                ->where('parent_id', $parentTodo->id)
-                                ->etc()
-                        )
-                        ->etc()
-                )
-        );
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $parentTodo->id);
+        $response->assertJsonPath('data.title', 'Parent Todo');
+        $response->assertJsonPath('data.description', 'Parent description');
+        $response->assertJsonCount(2, 'data.children');
+        $response->assertJsonPath('data.children.0.id', $childTodo1->id);
+        $response->assertJsonPath('data.children.0.title', 'Child Todo 1');
+        $response->assertJsonPath('data.children.0.parent_id', $parentTodo->id);
+        $response->assertJsonPath('data.children.1.id', $childTodo2->id);
+        $response->assertJsonPath('data.children.1.title', 'Child Todo 2');
+        $response->assertJsonPath('data.children.1.parent_id', $parentTodo->id);
     }
 
     public function test_show_todo_with_no_ancestors_returns_empty_ancestors()
@@ -552,20 +512,12 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->get(route('todo.show', $todo->id));
+        $response = $this->getJson(route('todo.show', $todo->id));
 
-        $response->assertInertia(
-            fn(Assert $page) =>
-            $page->component('todo/todo-detail')
-                ->has(
-                    'todo',
-                    fn(Assert $page) =>
-                    $page->where('id', $todo->id)
-                        ->where('title', 'Top Level Todo')
-                        ->etc()
-                )
-                ->has('ancestors', 0) // No ancestors for top-level todo
-        );
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $todo->id);
+        $response->assertJsonPath('data.title', 'Top Level Todo');
+        $response->assertJsonCount(0, 'ancestors');
     }
 
     public function test_toggle_completed_marks_incomplete_todo_as_completed()
@@ -579,15 +531,17 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+        $response = $this->patchJson(route('todo.toggle-completed', $todo->id));
 
         $this->assertDatabaseHas('todos', [
             'id' => $todo->id,
             'completed_at' => now()->format('Y-m-d H:i:s'),
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo marked as completed',
+        ]);
     }
 
     public function test_toggle_completed_marks_completed_todo_as_incomplete()
@@ -602,15 +556,17 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+        $response = $this->patchJson(route('todo.toggle-completed', $todo->id));
 
         $this->assertDatabaseHas('todos', [
             'id' => $todo->id,
             'completed_at' => null,
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as incomplete');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo marked as incomplete',
+        ]);
     }
 
     public function test_toggle_completed_requires_authenticated_user()
@@ -645,7 +601,7 @@ class TodoControllerTest extends TestCase
         $this->actingAs($user);
 
         $beforeToggle = now()->subSecond();
-        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+        $response = $this->patchJson(route('todo.toggle-completed', $todo->id));
         $afterToggle = now()->addSecond();
 
         $todo->refresh();
@@ -653,8 +609,10 @@ class TodoControllerTest extends TestCase
         $this->assertNotNull($todo->completed_at);
         $this->assertTrue($todo->completed_at->between($beforeToggle, $afterToggle));
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo marked as completed',
+        ]);
     }
 
     public function test_toggle_completed_preserves_other_todo_attributes()
@@ -669,7 +627,7 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+        $response = $this->patchJson(route('todo.toggle-completed', $todo->id));
 
         $this->assertDatabaseHas('todos', [
             'id' => $todo->id,
@@ -677,8 +635,10 @@ class TodoControllerTest extends TestCase
             'description' => 'Test Description',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo marked as completed',
+        ]);
     }
 
     public function test_toggle_completed_works_with_child_todos()
@@ -699,7 +659,7 @@ class TodoControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->patch(route('todo.toggle-completed', $childTodo->id));
+        $response = $this->patchJson(route('todo.toggle-completed', $childTodo->id));
 
         $this->assertDatabaseHas('todos', [
             'id' => $childTodo->id,
@@ -712,7 +672,9 @@ class TodoControllerTest extends TestCase
             'completed_at' => null,
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Todo marked as completed');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Todo marked as completed',
+        ]);
     }
 }

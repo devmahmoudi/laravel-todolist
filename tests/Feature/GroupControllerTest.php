@@ -16,12 +16,14 @@ class GroupControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->post('/group', [
+        $response = $this->postJson('/group', [
             'name' => 'Test Group',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'New group has been created.');
+        $response->assertCreated();
+        $response->assertJson([
+            'message' => 'New group has been created.',
+        ]);
         $this->assertDatabaseHas('groups', [
             'name' => 'Test Group',
             'owner_id' => $user->id,
@@ -59,12 +61,14 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create(['name' => 'Old Name']);
         $this->actingAs($user);
 
-        $response = $this->patch('/group/' . $group->id, [
+        $response = $this->patchJson('/group/' . $group->id, [
             'name' => 'New Name',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Group has been updated.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Group has been updated.',
+        ]);
         $this->assertDatabaseHas('groups', [
             'id' => $group->id,
             'name' => 'New Name',
@@ -122,10 +126,12 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create();
         $this->actingAs($user);
 
-        $response = $this->delete('/group/' . $group->id);
+        $response = $this->deleteJson('/group/' . $group->id);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Group has been deleted.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Group has been deleted.',
+        ]);
         $this->assertDatabaseMissing('groups', [
             'id' => $group->id,
         ]);
