@@ -3,13 +3,12 @@
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\TodoController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
 
 Route::redirect('/', '/dashboard', 301)->name('home');
 
 Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('dashboard');
+        return response()->json(['message' => 'Dashboard']);
     })->name('dashboard');
 
     // GROUP routes (resource-style API)
@@ -30,4 +29,3 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 });
 
 require __DIR__ . '/settings.php';
-require __DIR__ . '/auth.php';
