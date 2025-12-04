@@ -7,14 +7,16 @@ use Inertia\Inertia;
 
 Route::redirect('/', '/dashboard', 301)->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
 
-    // GROUP routes
+    // GROUP routes (resource-style API)
     Route::name('group.')->prefix('/group')->controller(GroupController::class)->group(function () {
+        Route::get('/', 'index')->name('index');
         Route::post('/', 'store')->name('store');
+        Route::get('/{group}', 'show')->name('show');
         Route::patch('/{group}', 'update')->name('update');
         Route::delete('/{group}', 'destroy')->name('destroy');
     });
