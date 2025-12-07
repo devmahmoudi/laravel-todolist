@@ -16,7 +16,7 @@ class GroupControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->postJson('/group', [
+        $response = $this->postJson('/api/group', [
             'name' => 'Test Group',
         ]);
 
@@ -35,11 +35,11 @@ class GroupControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->post('/group', [
+        $response = $this->postJson('/api/group', [
             'name' => '',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_group_name_must_be_unique()
@@ -48,11 +48,11 @@ class GroupControllerTest extends TestCase
         Group::factory()->for($user, 'owner')->create(['name' => 'Existing Group']);
         $this->actingAs($user);
 
-        $response = $this->post('/group', [
+        $response = $this->postJson('/api/group', [
             'name' => 'Existing Group',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_authenticated_user_can_update_group()
@@ -61,7 +61,7 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create(['name' => 'Old Name']);
         $this->actingAs($user);
 
-        $response = $this->patchJson('/group/' . $group->id, [
+        $response = $this->putJson('/api/group/' . $group->id, [
             'name' => 'New Name',
         ]);
 
@@ -81,11 +81,11 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create(['name' => 'Old Name']);
         $this->actingAs($user);
 
-        $response = $this->patch('/group/' . $group->id, [
+        $response = $this->putJson('/api/group/' . $group->id, [
             'name' => '',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_group_update_name_must_be_unique()
@@ -95,11 +95,11 @@ class GroupControllerTest extends TestCase
         $group2 = Group::factory()->for($user, 'owner')->create(['name' => 'Group Two']);
         $this->actingAs($user);
 
-        $response = $this->patch('/group/' . $group2->id, [
+        $response = $this->putJson('/api/group/' . $group2->id, [
             'name' => 'Group One',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_user_cannot_update_another_users_group()
@@ -109,7 +109,7 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user2, 'owner')->create(['name' => 'Other Group']);
         $this->actingAs($user1);
 
-        $response = $this->patch('/group/' . $group->id, [
+        $response = $this->putJson('/api/group/' . $group->id, [
             'name' => 'Hacked Name',
         ]);
 
@@ -126,7 +126,7 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create();
         $this->actingAs($user);
 
-        $response = $this->deleteJson('/group/' . $group->id);
+        $response = $this->deleteJson('/api/group/' . $group->id);
 
         $response->assertOk();
         $response->assertJson([
@@ -144,7 +144,7 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($owner, 'owner')->create();
         $this->actingAs($otherUser);
 
-        $response = $this->delete('/group/' . $group->id);
+        $response = $this->deleteJson('/api/group/' . $group->id);
 
         $response->assertStatus(404);
         $this->assertDatabaseHas('groups', [
@@ -162,7 +162,7 @@ class GroupControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->getJson('/group');
+        $response = $this->getJson('/api/group');
 
         $response->assertOk();
         $response->assertJsonCount(3, 'data');
@@ -183,7 +183,7 @@ class GroupControllerTest extends TestCase
 
         $this->actingAs($user);
 
-        $response = $this->getJson('/group/' . $group->id);
+        $response = $this->getJson('/api/group/' . $group->id);
 
         $response->assertOk();
         $response->assertJsonPath('data.id', $group->id);

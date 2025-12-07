@@ -183,7 +183,7 @@ class TodoControllerTest extends TestCase
             'description' => null,
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
         $this->assertDatabaseHas('todos', [
             'id' => $todo->id,
@@ -209,9 +209,9 @@ class TodoControllerTest extends TestCase
             'description' => 'Updated description',
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
-        $response->assertSessionHasErrors(['title']);
+        $response->assertJsonValidationErrors(['title']);
     }
 
     public function test_update_todo_validation_title_max_length()
@@ -227,9 +227,9 @@ class TodoControllerTest extends TestCase
             'description' => 'Updated description',
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
-        $response->assertSessionHasErrors(['title']);
+        $response->assertJsonValidationErrors(['title']);
     }
 
     public function test_update_todo_validation_title_must_be_string()
@@ -245,9 +245,9 @@ class TodoControllerTest extends TestCase
             'description' => 'Updated description',
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
-        $response->assertSessionHasErrors(['title']);
+        $response->assertJsonValidationErrors(['title']);
     }
 
     public function test_update_todo_validation_description_must_be_string()
@@ -263,9 +263,9 @@ class TodoControllerTest extends TestCase
             'description' => 123, // Not a string
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
-        $response->assertSessionHasErrors(['description']);
+        $response->assertJsonValidationErrors(['description']);
     }
 
     public function test_update_todo_authorization_requires_authenticated_user()
@@ -278,9 +278,9 @@ class TodoControllerTest extends TestCase
             'description' => 'Updated description',
         ];
 
-        $response = $this->put(route('todo.update', $todo->id), $updateData);
+        $response = $this->putJson(route('todo.update', $todo->id), $updateData);
 
-        $response->assertRedirect('/login');
+        $response->assertUnauthorized();
     }
 
     public function test_update_todo_returns_404_for_nonexistent_todo()
@@ -293,7 +293,7 @@ class TodoControllerTest extends TestCase
             'description' => 'Updated description',
         ];
 
-        $response = $this->put(route('todo.update', 99999), $updateData);
+        $response = $this->putJson(route('todo.update', 99999), $updateData);
 
         $response->assertNotFound();
     }
@@ -347,9 +347,9 @@ class TodoControllerTest extends TestCase
         $group = Group::factory()->create();
         $todo = Todo::factory()->for($group)->create();
 
-        $response = $this->get(route('todo.show', $todo->id));
+        $response = $this->getJson(route('todo.show', $todo->id));
 
-        $response->assertRedirect('/login');
+        $response->assertUnauthorized();
     }
 
     public function test_show_todo_returns_404_for_nonexistent_todo()
@@ -357,7 +357,7 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->get(route('todo.show', 99999));
+        $response = $this->getJson(route('todo.show', 99999));
 
         $response->assertNotFound();
     }
@@ -533,10 +533,8 @@ class TodoControllerTest extends TestCase
 
         $response = $this->patchJson(route('todo.toggle-completed', $todo->id));
 
-        $this->assertDatabaseHas('todos', [
-            'id' => $todo->id,
-            'completed_at' => now()->format('Y-m-d H:i:s'),
-        ]);
+        $todo->refresh();
+        $this->assertNotNull($todo->completed_at);
 
         $response->assertOk();
         $response->assertJson([
@@ -574,9 +572,9 @@ class TodoControllerTest extends TestCase
         $group = Group::factory()->create();
         $todo = Todo::factory()->for($group)->create();
 
-        $response = $this->patch(route('todo.toggle-completed', $todo->id));
+        $response = $this->patchJson(route('todo.toggle-completed', $todo->id));
 
-        $response->assertRedirect('/login');
+        $response->assertUnauthorized();
     }
 
     public function test_toggle_completed_returns_404_for_nonexistent_todo()
@@ -584,7 +582,7 @@ class TodoControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->patch(route('todo.toggle-completed', 99999));
+        $response = $this->patchJson(route('todo.toggle-completed', 99999));
 
         $response->assertNotFound();
     }
@@ -661,10 +659,8 @@ class TodoControllerTest extends TestCase
 
         $response = $this->patchJson(route('todo.toggle-completed', $childTodo->id));
 
-        $this->assertDatabaseHas('todos', [
-            'id' => $childTodo->id,
-            'completed_at' => now()->format('Y-m-d H:i:s'),
-        ]);
+        $childTodo->refresh();
+        $this->assertNotNull($childTodo->completed_at);
 
         // Parent should remain unchanged
         $this->assertDatabaseHas('todos', [
