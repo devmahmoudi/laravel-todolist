@@ -16,12 +16,14 @@ class GroupControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->post('/group', [
+        $response = $this->postJson('/api/group', [
             'name' => 'Test Group',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'New group has been created.');
+        $response->assertCreated();
+        $response->assertJson([
+            'message' => 'New group has been created.',
+        ]);
         $this->assertDatabaseHas('groups', [
             'name' => 'Test Group',
             'owner_id' => $user->id,
@@ -33,11 +35,11 @@ class GroupControllerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
-        $response = $this->post('/group', [
+        $response = $this->postJson('/api/group', [
             'name' => '',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_group_name_must_be_unique()
@@ -46,11 +48,11 @@ class GroupControllerTest extends TestCase
         Group::factory()->for($user, 'owner')->create(['name' => 'Existing Group']);
         $this->actingAs($user);
 
-        $response = $this->post('/group', [
+        $response = $this->postJson('/api/group', [
             'name' => 'Existing Group',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_authenticated_user_can_update_group()
@@ -59,12 +61,14 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create(['name' => 'Old Name']);
         $this->actingAs($user);
 
-        $response = $this->patch('/group/' . $group->id, [
+        $response = $this->putJson('/api/group/' . $group->id, [
             'name' => 'New Name',
         ]);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Group has been updated.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Group has been updated.',
+        ]);
         $this->assertDatabaseHas('groups', [
             'id' => $group->id,
             'name' => 'New Name',
@@ -77,11 +81,11 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create(['name' => 'Old Name']);
         $this->actingAs($user);
 
-        $response = $this->patch('/group/' . $group->id, [
+        $response = $this->putJson('/api/group/' . $group->id, [
             'name' => '',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_group_update_name_must_be_unique()
@@ -91,11 +95,11 @@ class GroupControllerTest extends TestCase
         $group2 = Group::factory()->for($user, 'owner')->create(['name' => 'Group Two']);
         $this->actingAs($user);
 
-        $response = $this->patch('/group/' . $group2->id, [
+        $response = $this->putJson('/api/group/' . $group2->id, [
             'name' => 'Group One',
         ]);
 
-        $response->assertSessionHasErrors('name');
+        $response->assertJsonValidationErrors('name');
     }
 
     public function test_user_cannot_update_another_users_group()
@@ -105,7 +109,7 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user2, 'owner')->create(['name' => 'Other Group']);
         $this->actingAs($user1);
 
-        $response = $this->patch('/group/' . $group->id, [
+        $response = $this->putJson('/api/group/' . $group->id, [
             'name' => 'Hacked Name',
         ]);
 
@@ -122,10 +126,12 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($user, 'owner')->create();
         $this->actingAs($user);
 
-        $response = $this->delete('/group/' . $group->id);
+        $response = $this->deleteJson('/api/group/' . $group->id);
 
-        $response->assertRedirect();
-        $response->assertSessionHas('toast.success', 'Group has been deleted.');
+        $response->assertOk();
+        $response->assertJson([
+            'message' => 'Group has been deleted.',
+        ]);
         $this->assertDatabaseMissing('groups', [
             'id' => $group->id,
         ]);
@@ -138,11 +144,50 @@ class GroupControllerTest extends TestCase
         $group = Group::factory()->for($owner, 'owner')->create();
         $this->actingAs($otherUser);
 
-        $response = $this->delete('/group/' . $group->id);
+        $response = $this->deleteJson('/api/group/' . $group->id);
 
         $response->assertStatus(404);
         $this->assertDatabaseHas('groups', [
             'id' => $group->id,
         ]);
     }
-} 
+
+    public function test_index_returns_authenticated_users_groups()
+    {
+        $user = User::factory()->create();
+        $otherUser = User::factory()->create();
+
+        $userGroups = Group::factory()->count(3)->for($user, 'owner')->create();
+        Group::factory()->count(2)->for($otherUser, 'owner')->create();
+
+        $this->actingAs($user);
+
+        $response = $this->getJson('/api/group');
+
+        $response->assertOk();
+        $response->assertJsonCount(3, 'data');
+
+        foreach ($userGroups as $group) {
+            $response->assertJsonFragment([
+                'id' => $group->id,
+                'name' => $group->name,
+                'owner_id' => $user->id,
+            ]);
+        }
+    }
+
+    public function test_show_returns_group_data_for_owner()
+    {
+        $user = User::factory()->create();
+        $group = Group::factory()->for($user, 'owner')->create();
+
+        $this->actingAs($user);
+
+        $response = $this->getJson('/api/group/' . $group->id);
+
+        $response->assertOk();
+        $response->assertJsonPath('data.id', $group->id);
+        $response->assertJsonPath('data.name', $group->name);
+        $response->assertJsonPath('data.owner_id', $user->id);
+    }
+}

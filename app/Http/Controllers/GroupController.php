@@ -5,15 +5,28 @@ namespace App\Http\Controllers;
 use App\Models\Group;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
 
 class GroupController extends Controller
 {
     /**
-     * Craete new Group
+     * Display a listing of the authenticated user's groups (API).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index()
+    {
+        $groups = Auth::user()->groups()->get();
+
+        return response()->json([
+            'data' => $groups,
+        ]);
+    }
+
+    /**
+     * Create new Group (API)
      *
      * @param Request $request
-     * @return void
+     * @return \Illuminate\Http\JsonResponse
      */
     public function store(Request $request)
     {
@@ -21,49 +34,72 @@ class GroupController extends Controller
             'name' => 'required|unique:groups,name|max:255',
         ]);
 
-        Auth::user()->groups()->create($validated);
+        $group = Auth::user()->groups()->create($validated);
 
-        return back()->with('toast.success', "New group has been created.");
+        return response()->json([
+            'message' => 'New group has been created.',
+            'data' => $group,
+        ], 201);
     }
 
     /**
-     * Update the specified Group
+     * Display the specified Group (API).
+     *
+     * @param \App\Models\Group $group
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function show(Group $group)
+    {
+        return response()->json([
+            'data' => $group,
+        ]);
+    }
+
+    /**
+     * Update the specified Group (API)
      *
      * @param \Illuminate\Http\Request $request
      * @param \App\Models\Group $group
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function update(Request $request, Group $group)
     {
         if ($group->owner_id !== Auth::id()) {
-            abort(403);
+            return response()->json([
+                'message' => 'Forbidden',
+            ], 403);
         }
-        
+
         $validated = $request->validate([
             'name' => 'required|unique:groups,name,' . $group->id . '|max:255',
         ]);
 
         $group->update($validated);
 
-        return back()->with('toast.success', 'Group has been updated.');
+        return response()->json([
+            'message' => 'Group has been updated.',
+            'data' => $group->fresh(),
+        ]);
     }
 
     /**
-     * Delete the specified Group
+     * Delete the specified Group (API)
      *
      * @param \App\Models\Group $group
-     * @return \Illuminate\Http\RedirectResponse
+     * @return \Illuminate\Http\JsonResponse
      */
     public function destroy(Group $group)
     {
         if ($group->owner_id !== Auth::id()) {
-            abort(403);
+            return response()->json([
+                'message' => 'Forbidden',
+            ], 403);
         }
 
         $group->delete();
 
-        return Redirect::route('dashboard')->with('toast.success', 'Group has been deleted.');
+        return response()->json([
+            'message' => 'Group has been deleted.',
+        ]);
     }
-
-    
 }
