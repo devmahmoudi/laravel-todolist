@@ -56,4 +56,4 @@
 
 ## 📜 License
 
-MIT License © 2023 [Your Name]
+MIT License © 2025 Mahdi Mahmoudi
